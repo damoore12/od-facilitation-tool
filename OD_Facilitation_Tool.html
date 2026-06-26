@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OD Facilitation Tool — AlignOrg Framework</title>
+<style>
+:root {
+  --primary: #1e3a5f;
+  --primary-light: #2d5282;
+  --secondary: #00798c;
+  --accent: #f4a261;
+  --success: #38a169;
+  --warning: #d69e2e;
+  --danger: #e53e3e;
+  --bg: #f7f8fa;
+  --card-bg: #ffffff;
+  --border: #e2e8f0;
+  --text: #2d3748;
+  --text-muted: #718096;
+  --phase-env: #553c9a;
+  --phase-strategy: #2b6cb0;
+  --phase-macro: #276749;
+  --phase-micro: #c05621;
+  --sidebar-width: 270px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+/* Layout */
+#top-bar { background: var(--primary); color: white; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+#top-bar h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.3px; }
+#top-bar .meta-bar { display: flex; gap: 16px; align-items: center; font-size: 13px; opacity: 0.85; }
+#progress-bar { height: 3px; background: rgba(255,255,255,0.2); margin-top: 8px; border-radius: 2px; overflow: hidden; }
+#progress-fill { height: 100%; background: var(--accent); transition: width 0.4s; border-radius: 2px; }
+#layout { display: flex; margin-top: 70px; min-height: calc(100vh - 70px); }
+
+/* Sidebar */
+#sidebar { width: var(--sidebar-width); background: var(--primary); color: white; position: fixed; top: 70px; bottom: 0; overflow-y: auto; z-index: 90; }
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+.sidebar-section { padding: 12px 8px 4px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+.nav-item { display: flex; align-items: center; padding: 8px 16px; cursor: pointer; transition: background 0.15s; border-left: 3px solid transparent; font-size: 13px; gap: 8px; }
+.nav-item:hover { background: rgba(255,255,255,0.08); }
+.nav-item.active { background: rgba(255,255,255,0.15); border-left-color: var(--accent); }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0; transition: all 0.2s; }
+.nav-dot.complete { background: var(--success); border-color: var(--success); }
+.nav-dot.partial { background: var(--accent); border-color: var(--accent); }
+.nav-phase-env .nav-dot.active-phase { border-color: #b794f4; }
+.nav-phase-strategy .nav-dot.active-phase { border-color: #63b3ed; }
+.nav-phase-macro .nav-dot.active-phase { border-color: #68d391; }
+.nav-phase-micro .nav-dot.active-phase { border-color: #f6ad55; }
+.phase-bar { height: 2px; margin: 0 16px 4px; border-radius: 1px; opacity: 0.4; }
+.phase-env { background: #b794f4; }
+.phase-strategy { background: #63b3ed; }
+.phase-macro { background: #68d391; }
+.phase-micro { background: #f6ad55; }
+
+/* Main content */
+#main { margin-left: var(--sidebar-width); padding: 28px; flex: 1; max-width: calc(100% - var(--sidebar-width)); }
+.section { display: none; max-width: 900px; margin: 0 auto; }
+.section.active { display: block; }
+
+/* Cards */
+.card { background: var(--card-bg); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 20px; overflow: hidden; border: 1px solid var(--border); }
+.card-header { padding: 16px 20px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; }
+.card-header h2 { font-size: 17px; font-weight: 600; }
+.card-header p { font-size: 12px; opacity: 0.8; margin-top: 3px; }
+.card-body { padding: 20px; }
+
+/* Phase-colored headers */
+.card-header.env { background: linear-gradient(135deg, #553c9a, #6b46c1); }
+.card-header.strategy { background: linear-gradient(135deg, #2a4a7f, #2b6cb0); }
+.card-header.macro { background: linear-gradient(135deg, #1a4731, #276749); }
+.card-header.micro { background: linear-gradient(135deg, #7b341e, #c05621); }
+
+/* Guide box */
+.guide-box { background: #ebf4ff; border-left: 4px solid var(--secondary); border-radius: 4px; padding: 14px 16px; margin-bottom: 16px; }
+.guide-box h4 { font-size: 12px; font-weight: 700; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.guide-box ul { padding-left: 18px; }
+.guide-box li { margin-bottom: 3px; font-size: 13px; color: var(--text); }
+
+/* Tip box */
+.tip-box { background: #fffbeb; border-left: 4px solid var(--warning); border-radius: 4px; padding: 12px 16px; margin-top: 16px; font-size: 13px; color: #744210; }
+.tip-box strong { display: block; margin-bottom: 4px; color: #92400e; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Form elements */
+label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+input[type=text], input[type=date], textarea, select { width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 14px; font-family: inherit; color: var(--text); background: white; transition: border-color 0.15s; }
+input[type=text]:focus, textarea:focus, select:focus { outline: none; border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(0,121,140,0.12); }
+textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.form-col { margin-bottom: 16px; }
+
+/* Buttons */
+.btn { padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: var(--secondary); color: white; }
+.btn-primary:hover { background: #006577; }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-outline:hover { background: var(--bg); }
+.btn-danger { background: #fed7d7; color: var(--danger); }
+.btn-danger:hover { background: #feb2b2; }
+.btn-success { background: #c6f6d5; color: #22543d; }
+.btn-success:hover { background: #9ae6b4; }
+.btn-group { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+/* Tables */
+.table-wrapper { overflow-x: auto; margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg); padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); white-space: nowrap; }
+td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+td input, td textarea, td select { border: none; background: transparent; width: 100%; font-size: 13px; font-family: inherit; color: var(--text); padding: 2px 4px; }
+td input:focus, td textarea:focus, td select:focus { outline: 1px solid var(--secondary); border-radius: 3px; background: white; }
+td textarea { min-height: 40px; resize: none; }
+.delete-btn { color: var(--danger); cursor: pointer; font-size: 16px; line-height: 1; border: none; background: none; padding: 2px 6px; border-radius: 3px; }
+.delete-btn:hover { background: #fed7d7; }
+
+/* Rationale grid */
+.rationale-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+.rationale-card { border: 2px solid var(--border); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; }
+.rationale-card:hover { border-color: var(--secondary); }
+.rationale-card.selected { border-color: var(--secondary); background: #ebf8ff; }
+.rationale-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.rationale-card .benefits { font-size: 11px; color: var(--success); margin-top: 6px; }
+.rationale-card .risks { font-size: 11px; color: var(--danger); }
+
+/* Linkage mechanisms */
+.mechanism-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mechanism-item { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+.mechanism-item label { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--text); font-weight: 400; margin: 0; }
+.mechanism-item input[type=checkbox] { margin-top: 2px; accent-color: var(--secondary); flex-shrink: 0; }
+.mechanism-cost { font-size: 11px; color: var(--text-muted); margin-top: 3px; padding-left: 20px; }
+
+/* RACI */
+.raci-cell { text-align: center; }
+.raci-select { border: none; background: transparent; font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px; border-radius: 4px; width: 100%; text-align: center; }
+.raci-R { color: #2b6cb0; background: #ebf8ff; }
+.raci-A { color: #276749; background: #f0fff4; }
+.raci-C { color: #c05621; background: #fffaf0; }
+.raci-I { color: #553c9a; background: #faf5ff; }
+.raci-none { color: var(--text-muted); }
+
+/* Diagnostic */
+.diag-question { border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+.diag-question h4 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.radio-group { display: flex; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+.radio-opt { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; }
+.radio-opt input { accent-color: var(--secondary); }
+.diag-flag { padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-top: 8px; }
+.flag-go { background: #f0fff4; border: 1px solid #9ae6b4; color: #22543d; }
+.flag-caution { background: #fffbeb; border: 1px solid #fbd38d; color: #744210; }
+.flag-stop { background: #fff5f5; border: 1px solid #feb2b2; color: #742a2a; }
+
+/* Work categorization */
+.work-cat-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.cat-badge { padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
+.cat-competitive { background: #c6f6d5; color: #22543d; }
+.cat-enabling { background: #bee3f8; color: #2a4a7f; }
+.cat-necessary { background: #fefcbf; color: #744210; }
+.cat-compliance { background: #fed7d7; color: #742a2a; }
+
+/* Placement */
+.placement-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.place-badge { padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
+.place-unique { background: #e9d8fd; color: #44337a; }
+.place-standard { background: #bee3f8; color: #2a4a7f; }
+.place-shared { background: #fefcbf; color: #744210; }
+
+/* Facilitator mode */
+#fac-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: rgba(255,255,255,0.75); }
+#fac-toggle input { accent-color: var(--accent); }
+.fac-note { background: #fffbeb; border: 1px solid #f6e05e; border-radius: 6px; padding: 14px 16px; margin-bottom: 16px; font-size: 13px; }
+.fac-note h4 { font-weight: 700; color: #744210; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.fac-only { display: none; }
+body.fac-mode .fac-only { display: block; }
+
+/* Bottom bar */
+#bottom-bar { position: fixed; bottom: 0; left: var(--sidebar-width); right: 0; background: white; border-top: 1px solid var(--border); padding: 10px 28px; display: flex; justify-content: space-between; align-items: center; z-index: 80; }
+#main { padding-bottom: 70px; }
+
+/* Summary export */
+.summary-section { margin-bottom: 24px; }
+.summary-section h3 { font-size: 15px; font-weight: 700; color: var(--primary); border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 12px; }
+.summary-field { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--bg); font-size: 13px; }
+.summary-field .label { font-weight: 600; color: var(--text-muted); min-width: 180px; }
+
+/* Print */
+@media print {
+  #top-bar, #sidebar, #bottom-bar, .btn, .btn-group, #fac-toggle { display: none !important; }
+  #layout { margin-top: 0; }
+  #main { margin-left: 0; padding: 20px; max-width: 100%; }
+  .section { display: block !important; page-break-inside: avoid; }
+  .card { box-shadow: none; border: 1px solid #ccc; margin-bottom: 16px; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  #bottom-bar { left: 0; }
+  .form-row { grid-template-columns: 1fr; }
+  .mechanism-grid { grid-template-columns: 1fr; }
+  .work-cat-legend, .placement-legend { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="top-bar">
+  <div>
+    <h1>&#9679; Organization Design Facilitation Tool</h1>
+    <div id="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
+  </div>
+  <div class="meta-bar">
+    <label id="fac-toggle"><input type="checkbox" id="fac-mode-cb" onchange="toggleFacMode()"> Facilitator Mode</label>
+    <span id="org-name-display" style="font-weight:600;">New Session</span>
+  </div>
+</div>
+
+<div id="layout">
+<nav id="sidebar">
+  <div style="padding:16px 16px 8px; font-size:11px; color:rgba(255,255,255,0.5); border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:8px;">AlignOrg Framework</div>
+
+  <div class="sidebar-section">Session</div>
+  <div class="nav-item" onclick="nav('setup')" id="nav-setup"><div class="nav-dot" id="dot-setup"></div> Session Setup</div>
+  <div class="nav-item" onclick="nav('diagnostic')" id="nav-diagnostic"><div class="nav-dot" id="dot-diagnostic"></div> Diagnostic Framework</div>
+
+  <div class="phase-bar phase-macro" style="margin-top:8px;"></div>
+  <div class="sidebar-section">Macro Design</div>
+  <div class="nav-item" onclick="nav('gap')" id="nav-gap"><div class="nav-dot" id="dot-gap"></div> Gap Analysis</div>
+  <div class="nav-item" onclick="nav('stakeholder')" id="nav-stakeholder"><div class="nav-dot" id="dot-stakeholder"></div> Stakeholder Analysis</div>
+  <div class="nav-item" onclick="nav('anchor')" id="nav-anchor"><div class="nav-dot" id="dot-anchor"></div> ANCHOR / Value Offering</div>
+  <div class="nav-item" onclick="nav('diff-activities')" id="nav-diff-activities"><div class="nav-dot" id="dot-diff-activities"></div> Differentiating Activities</div>
+  <div class="nav-item" onclick="nav('design-criteria')" id="nav-design-criteria"><div class="nav-dot" id="dot-design-criteria"></div> Design Criteria</div>
+  <div class="nav-item" onclick="nav('culture-behaviors')" id="nav-culture-behaviors"><div class="nav-dot" id="dot-culture-behaviors"></div> Strategic Culture Behaviors</div>
+  <div class="nav-item" onclick="nav('business-model')" id="nav-business-model"><div class="nav-dot" id="dot-business-model"></div> Business Model Development</div>
+  <div class="nav-item" onclick="nav('work-cat')" id="nav-work-cat"><div class="nav-dot" id="dot-work-cat"></div> Work Categorization</div>
+  <div class="nav-item" onclick="nav('placement')" id="nav-placement"><div class="nav-dot" id="dot-placement"></div> Placement of Work</div>
+  <div class="nav-item" onclick="nav('org-rationale')" id="nav-org-rationale"><div class="nav-dot" id="dot-org-rationale"></div> Organizing Rationale</div>
+  <div class="nav-item" onclick="nav('linkages')" id="nav-linkages"><div class="nav-dot" id="dot-linkages"></div> Linkages</div>
+  <div class="nav-item" onclick="nav('raci')" id="nav-raci"><div class="nav-dot" id="dot-raci"></div> RACI Table</div>
+
+  <div class="phase-bar phase-micro" style="margin-top:8px;"></div>
+  <div class="sidebar-section">Micro Design</div>
+  <div class="nav-item" onclick="nav('process-eval')" id="nav-process-eval"><div class="nav-dot" id="dot-process-eval"></div> Process Evaluation</div>
+  <div class="nav-item" onclick="nav('org-choices')" id="nav-org-choices"><div class="nav-dot" id="dot-org-choices"></div> Aligning Org Choices</div>
+
+  <div class="sidebar-section" style="margin-top:8px;">Output</div>
+  <div class="nav-item" onclick="nav('summary')" id="nav-summary"><div class="nav-dot" id="dot-summary"></div> Session Summary</div>
+</nav>
+
+<main id="main">
+
+<!-- ============================================================ SECTION: SETUP -->
+<div class="section active" id="sec-setup">
+  <div class="card">
+    <div class="card-header">
+      <h2>Session Setup</h2>
+      <p>Capture the context for this organizational design engagement</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Complete this before the session begins. Share the Org Name and Scope with participants to align expectations. The Objectives field should capture the specific outcomes this group is trying to achieve through this OD work.
+      </div>
+      <div class="form-row">
+        <div class="form-col">
+          <label>Organization / Business Unit</label>
+          <input type="text" id="meta-orgName" placeholder="e.g., BC Public Service – Finance Division" oninput="save()">
+        </div>
+        <div class="form-col">
+          <label>Session Date</label>
+          <input type="date" id="meta-date" oninput="save()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-col">
+          <label>Facilitator Name</label>
+          <input type="text" id="meta-facilitator" placeholder="Your name" oninput="save()">
+        </div>
+        <div class="form-col">
+          <label>Participants</label>
+          <input type="text" id="meta-participants" placeholder="Names or roles" oninput="save()">
+        </div>
+      </div>
+      <div class="form-col">
+        <label>Scope of Design Work</label>
+        <input type="text" id="meta-scope" placeholder="e.g., Full ministry redesign / specific branch / team structure" oninput="save()">
+      </div>
+      <div class="form-col">
+        <label>Session Objectives</label>
+        <textarea id="meta-objectives" rows="3" placeholder="What does this group need to accomplish in this session?" oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>Design Scope Constraints</label>
+        <textarea id="meta-designScope" rows="2" placeholder="Budget limits, headcount constraints, political factors, non-negotiables..." oninput="save()"></textarea>
+      </div>
+      <div class="tip-box">
+        <strong>Tip</strong>
+        Agree on design scope early. Misalignment on what IS and IS NOT in scope for redesign is one of the most common causes of frustration in OD work.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: DIAGNOSTIC -->
+<div class="section" id="sec-diagnostic">
+  <div class="card">
+    <div class="card-header">
+      <h2>Diagnostic Framework</h2>
+      <p>Determine which parts of the OD framework require the most attention</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Use this diagnostic to calibrate where the group needs to spend the most time. If foundational elements (strategy, results clarity) are weak, address those before moving to structural choices. A "stop" flag doesn't mean don't proceed—it means this area needs dedicated attention first.
+      </div>
+      <div class="guide-box">
+        <h4>Purpose</h4>
+        <ul>
+          <li>Assess the organization's current health across the OD model dimensions</li>
+          <li>Identify which areas are causing or contributing to the gaps you're experiencing</li>
+          <li>Prioritize where to focus in this session</li>
+        </ul>
+      </div>
+
+      <div id="diag-questions">
+        <div class="diag-question">
+          <h4>1. Are the desired results clearly defined and agreed upon?</h4>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="diag-results" value="yes" onchange="saveDiag()"> Yes — clear and agreed</label>
+            <label class="radio-opt"><input type="radio" name="diag-results" value="partial" onchange="saveDiag()"> Partially — some ambiguity</label>
+            <label class="radio-opt"><input type="radio" name="diag-results" value="no" onchange="saveDiag()"> No — unclear or debated</label>
+          </div>
+          <div class="fac-only" style="font-size:12px; color:var(--text-muted);">If No/Partial: Spend time in Gap Analysis before proceeding. Results must be clear before structure can be designed.</div>
+        </div>
+
+        <div class="diag-question">
+          <h4>2. Is the strategy sufficiently clear to make design choices?</h4>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="diag-strategy" value="yes" onchange="saveDiag()"> Yes — clear strategy exists</label>
+            <label class="radio-opt"><input type="radio" name="diag-strategy" value="partial" onchange="saveDiag()"> Partially — some gaps</label>
+            <label class="radio-opt"><input type="radio" name="diag-strategy" value="no" onchange="saveDiag()"> No — strategy is unclear</label>
+          </div>
+        </div>
+
+        <div class="diag-question">
+          <h4>3. Is the issue systemic (organizational) or individual (performance)?</h4>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="diag-systemic" value="systemic" onchange="saveDiag()"> Systemic — structure/process/incentives</label>
+            <label class="radio-opt"><input type="radio" name="diag-systemic" value="individual" onchange="saveDiag()"> Individual — specific people/behaviours</label>
+            <label class="radio-opt"><input type="radio" name="diag-systemic" value="both" onchange="saveDiag()"> Both</label>
+          </div>
+          <div class="fac-only" style="font-size:12px; color:var(--text-muted);">OD tools address systemic issues. Individual performance issues require HR/talent management approaches, not reorganization.</div>
+        </div>
+
+        <div class="diag-question">
+          <h4>4. Does the current culture support or undermine the desired results?</h4>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="diag-culture" value="supports" onchange="saveDiag()"> Supports — culture is aligned</label>
+            <label class="radio-opt"><input type="radio" name="diag-culture" value="neutral" onchange="saveDiag()"> Neutral — not a key factor</label>
+            <label class="radio-opt"><input type="radio" name="diag-culture" value="undermines" onchange="saveDiag()"> Undermines — culture is a barrier</label>
+          </div>
+        </div>
+
+        <div class="diag-question">
+          <h4>5. Is the macro structure (overall organization shape) adequate?</h4>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="diag-macro" value="yes" onchange="saveDiag()"> Yes — structure is fit for purpose</label>
+            <label class="radio-opt"><input type="radio" name="diag-macro" value="partial" onchange="saveDiag()"> Partially — some structural issues</label>
+            <label class="radio-opt"><input type="radio" name="diag-macro" value="no" onchange="saveDiag()"> No — structural redesign needed</label>
+          </div>
+        </div>
+
+        <div class="diag-question">
+          <h4>6. Are micro-level processes, roles, and workflows well-designed?</h4>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="diag-micro" value="yes" onchange="saveDiag()"> Yes — processes and roles are clear</label>
+            <label class="radio-opt"><input type="radio" name="diag-micro" value="partial" onchange="saveDiag()"> Partially — some role/process confusion</label>
+            <label class="radio-opt"><input type="radio" name="diag-micro" value="no" onchange="saveDiag()"> No — significant role/process issues</label>
+          </div>
+        </div>
+
+        <div class="diag-question">
+          <h4>7. Is there a continuous improvement mechanism in place?</h4>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="diag-ci" value="yes" onchange="saveDiag()"> Yes — ongoing improvement is embedded</label>
+            <label class="radio-opt"><input type="radio" name="diag-ci" value="partial" onchange="saveDiag()"> Partially — ad hoc improvement efforts</label>
+            <label class="radio-opt"><input type="radio" name="diag-ci" value="no" onchange="saveDiag()"> No — no systematic improvement</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-col" style="margin-top:16px;">
+        <label>Diagnostic Summary Notes</label>
+        <textarea id="diag-notes" rows="3" placeholder="Key observations from the diagnostic discussion..." oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: GAP ANALYSIS -->
+<div class="section" id="sec-gap">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Gap Analysis</h2>
+      <p>Identify the gap between current and desired results for key stakeholders</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Start with RESULTS, not structure. The gap is between what we're getting and what we need. Resist the temptation to jump to solutions. Each row should represent a distinct stakeholder group's experience of the gap.
+      </div>
+      <div class="guide-box">
+        <h4>Guiding Questions</h4>
+        <ul>
+          <li>What results are we currently getting? What results do we need to get?</li>
+          <li>Who is experiencing the gap most acutely?</li>
+          <li>What is the magnitude and urgency of each gap?</li>
+          <li>What questions do we need to answer to close the gap?</li>
+        </ul>
+      </div>
+      <div class="table-wrapper">
+        <table id="gap-table">
+          <thead>
+            <tr>
+              <th>Stakeholder / Group</th>
+              <th>Current Results Getting</th>
+              <th>Desired Results Needed</th>
+              <th>The Gap</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="gap-body"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="addRow('gap')">+ Add Row</button>
+      <div class="form-col" style="margin-top:16px;">
+        <label>Key Questions to Resolve</label>
+        <textarea id="gap-keyQuestions" rows="3" placeholder="What questions emerged that need answers before design decisions can be made?" oninput="save()"></textarea>
+      </div>
+      <div class="tip-box">
+        <strong>Tip</strong>
+        Be specific about results — not activities or outputs. "We need faster decisions" is an output. "We need policy decisions made within 5 business days so clients can proceed with projects" is a result.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: STAKEHOLDER -->
+<div class="section" id="sec-stakeholder">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Stakeholder Analysis</h2>
+      <p>Identify stakeholders and their requirements of the organization</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Stakeholders are those who receive value FROM the organization or who the organization depends ON. Capture their specific requirements — what they need the organization to deliver. This informs design criteria.
+      </div>
+      <div class="guide-box">
+        <h4>Guiding Questions</h4>
+        <ul>
+          <li>Who are the key stakeholders this organization must serve?</li>
+          <li>What does each stakeholder group specifically need from us?</li>
+          <li>Which stakeholder requirements are we currently not meeting well?</li>
+          <li>Are there competing stakeholder requirements that create tension?</li>
+        </ul>
+      </div>
+      <div class="table-wrapper">
+        <table id="stakeholder-table">
+          <thead>
+            <tr>
+              <th>Stakeholder / Group</th>
+              <th>Their Key Requirements of Us</th>
+              <th>Current Performance</th>
+              <th>Priority</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="stakeholder-body"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="addRow('stakeholder')">+ Add Stakeholder</button>
+      <div class="form-col" style="margin-top:16px;">
+        <label>Notes & Tensions</label>
+        <textarea id="stakeholder-notes" rows="3" placeholder="Conflicting requirements, prioritization decisions, key insights..." oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: ANCHOR -->
+<div class="section" id="sec-anchor">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>ANCHOR / Value Offering</h2>
+      <p>Clarify who you serve, what you offer, and how you deliver it</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        ANCHOR helps clarify the value proposition — this drives design choices. An Employee Value Offering applies the same thinking internally to attract and retain talent. Both should be explicit before structural choices are made.
+      </div>
+      <div class="guide-box">
+        <h4>ANCHOR Framework</h4>
+        <ul>
+          <li><strong>A — Audience:</strong> Who are your target clients/customers?</li>
+          <li><strong>N — Need:</strong> What problems or needs do you solve for them?</li>
+          <li><strong>C — Channel:</strong> How do you deliver value to them?</li>
+          <li><strong>H — Omit (Hold Back):</strong> Who/what are you NOT trying to serve?</li>
+          <li><strong>O — Outcome/Revenue:</strong> What is the value/return for the organization?</li>
+          <li><strong>R — Rationale:</strong> Why are you the right provider of this value?</li>
+        </ul>
+      </div>
+      <div class="form-row">
+        <div class="form-col">
+          <label>Audience — Who you serve</label>
+          <textarea id="anchor-audience" rows="3" placeholder="Specific client segments, citizen groups, internal clients..." oninput="save()"></textarea>
+        </div>
+        <div class="form-col">
+          <label>Need — Problems you solve</label>
+          <textarea id="anchor-need" rows="3" placeholder="The specific needs, challenges, or outcomes your clients require..." oninput="save()"></textarea>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-col">
+          <label>Channel — How you deliver</label>
+          <textarea id="anchor-channel" rows="3" placeholder="Delivery mechanisms, service channels, interaction points..." oninput="save()"></textarea>
+        </div>
+        <div class="form-col">
+          <label>Omit — What you will NOT do</label>
+          <textarea id="anchor-omit" rows="3" placeholder="Explicitly out of scope clients, services, or delivery approaches..." oninput="save()"></textarea>
+        </div>
+      </div>
+      <div class="form-col">
+        <label>Revenue / Return — Value to the organization</label>
+        <textarea id="anchor-revenue" rows="2" placeholder="Budget, mandate fulfilment, public trust, reduced risk, policy outcomes..." oninput="save()"></textarea>
+      </div>
+      <hr style="border:none; border-top:1px solid var(--border); margin:20px 0;">
+      <h3 style="font-size:15px; font-weight:700; margin-bottom:12px; color:var(--primary);">Employee Value Offering</h3>
+      <div class="guide-box">
+        <h4>Guiding Questions</h4>
+        <ul>
+          <li>What do we offer employees that makes us an employer of choice?</li>
+          <li>What type of person thrives in this organization?</li>
+          <li>What are we NOT offering (and that's intentional)?</li>
+        </ul>
+      </div>
+      <div class="form-col">
+        <label>Employee Value Offering Statement</label>
+        <textarea id="anchor-evo" rows="4" placeholder="What we offer employees: meaningful work, growth, environment, flexibility, impact..." oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>Notes</label>
+        <textarea id="anchor-notes" rows="2" placeholder="Key decisions, tensions, or follow-up items..." oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: DIFFERENTIATING ACTIVITIES -->
+<div class="section" id="sec-diff-activities">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Differentiating Activities</h2>
+      <p>Identify the activities that most directly deliver on your value offering</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Differentiating activities are the handful of things the organization does that most directly create the value it uniquely provides. These are NOT everything the org does — they are what makes it distinctively valuable. Design should protect and enable these activities.
+      </div>
+      <div class="guide-box">
+        <h4>Guiding Questions</h4>
+        <ul>
+          <li>What is our core value offering to stakeholders?</li>
+          <li>What specific activities most directly create that value?</li>
+          <li>How are we uniquely doing these activities differently than others could?</li>
+          <li>What resources (people, technology, knowledge) does each require?</li>
+        </ul>
+      </div>
+      <div class="form-col">
+        <label>Our Core Value Offering (from ANCHOR)</label>
+        <input type="text" id="diff-offering" placeholder="Summarize the key value this organization provides..." oninput="save()">
+      </div>
+      <div class="table-wrapper" style="margin-top:16px;">
+        <table id="diff-table">
+          <thead>
+            <tr>
+              <th>Differentiating Activity</th>
+              <th>How We Do It Differently</th>
+              <th>Key Resources Required</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="diff-body"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="addRow('diff')">+ Add Activity</button>
+      <div class="form-col" style="margin-top:16px;">
+        <label>Notes</label>
+        <textarea id="diff-notes" rows="2" placeholder="What surprised you? What must the design protect?" oninput="save()"></textarea>
+      </div>
+      <div class="tip-box">
+        <strong>Tip</strong>
+        Limit to 3–5 truly differentiating activities. If everything is differentiating, nothing is. These activities should drive where you invest resources and how you organize.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: DESIGN CRITERIA -->
+<div class="section" id="sec-design-criteria">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Design Criteria</h2>
+      <p>Establish the standards any good design solution must meet</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Design criteria are the decision rules — they translate strategy and stakeholder requirements into evaluable standards. Good criteria are meaningful (consequential if violated), applicable (distinguishes between options), and measurable (can be assessed). Non-negotiables are absolute requirements; all design options must meet these.
+      </div>
+      <div class="guide-box">
+        <h4>Guiding Questions</h4>
+        <ul>
+          <li>What must any good design solution accomplish?</li>
+          <li>What stakeholder requirements must the design enable?</li>
+          <li>What strategic outcomes must the structure support?</li>
+          <li>What problems must the design solve that the current structure doesn't?</li>
+        </ul>
+      </div>
+      <div class="table-wrapper">
+        <table id="criteria-table">
+          <thead>
+            <tr>
+              <th>Design Criterion</th>
+              <th>Meaningful?</th>
+              <th>Applicable?</th>
+              <th>Measurable?</th>
+              <th>Priority</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="criteria-body"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="addRow('criteria')">+ Add Criterion</button>
+      <div class="form-col" style="margin-top:16px;">
+        <label>Non-Negotiables (Absolute Requirements)</label>
+        <textarea id="criteria-nonneg" rows="3" placeholder="Design requirements that cannot be compromised under any circumstances..." oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>Notes</label>
+        <textarea id="criteria-notes" rows="2" placeholder="Trade-offs identified, prioritization rationale..." oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: CULTURE BEHAVIORS -->
+<div class="section" id="sec-culture-behaviors">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Strategic Culture Behaviors</h2>
+      <p>Define the behaviours that support and enable desired results</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Culture is how we do things here. Strategic culture behaviors are the specific observable behaviors that, if widely practiced, would support achievement of desired results. The design should reinforce these behaviors through structure, metrics, rewards, and processes.
+      </div>
+      <div class="guide-box">
+        <h4>Guiding Questions</h4>
+        <ul>
+          <li>What behaviors, if widely demonstrated, would most support our desired results?</li>
+          <li>What behaviors are currently undermining our results?</li>
+          <li>How does our organizational design reinforce or undermine the right behaviors?</li>
+          <li>What structural changes would make desired behaviors easier to demonstrate?</li>
+        </ul>
+      </div>
+      <div class="form-col">
+        <label>Desired Results (from Gap Analysis)</label>
+        <input type="text" id="culture-results" placeholder="What results are we designing culture to support?" oninput="save()">
+      </div>
+      <div class="table-wrapper" style="margin-top:12px;">
+        <table id="culture-table">
+          <thead>
+            <tr>
+              <th>Strategic Behavior</th>
+              <th>Organizational Choice Implications</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="culture-body"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="addRow('culture')">+ Add Behavior</button>
+      <div class="form-col" style="margin-top:16px;">
+        <label>Notes</label>
+        <textarea id="culture-notes" rows="2" placeholder="Cultural barriers, enablers, and design implications..." oninput="save()"></textarea>
+      </div>
+      <div class="tip-box">
+        <strong>Tip</strong>
+        Behaviors must be observable and specific — not values statements. "We collaborate across silos" is a value. "Teams proactively share project status updates with affected groups before decisions are finalized" is a behavior.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: BUSINESS MODEL -->
+<div class="section" id="sec-business-model">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Business Model Development</h2>
+      <p>Map how the organization creates and delivers value</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        The business model describes how the organization's work connects — inputs, key activities, outputs, and value delivered. Understanding this system is essential before deciding how to organize. Structure should follow the business model, not the other way around.
+      </div>
+      <div class="guide-box">
+        <h4>Guiding Questions</h4>
+        <ul>
+          <li>What are the key inputs (people, funding, information, requests) we receive?</li>
+          <li>What are the core processes and activities we perform to create value?</li>
+          <li>What outputs/services do we deliver, and to whom?</li>
+          <li>What are the key dependencies between our activities?</li>
+          <li>Where does value creation happen, and where does it break down?</li>
+        </ul>
+      </div>
+      <div class="form-col">
+        <label>Business Model Description</label>
+        <textarea id="bm-description" rows="4" placeholder="Describe how this organization creates and delivers value — the flow from inputs to outputs..." oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>Key Processes</label>
+        <textarea id="bm-keyProcesses" rows="4" placeholder="List the primary work processes that deliver value (these feed into Work Categorization)..." oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>Key Dependencies and Handoffs</label>
+        <textarea id="bm-dependencies" rows="3" placeholder="Where does work pass between groups? Where do handoffs cause delays or quality issues?" oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>Notes</label>
+        <textarea id="bm-notes" rows="2" placeholder="Insights, gaps in understanding, follow-up questions..." oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: WORK CATEGORIZATION -->
+<div class="section" id="sec-work-cat">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Work Categorization</h2>
+      <p>Classify work by its strategic value to allocate resources appropriately</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        This tool challenges assumptions about where time and resources go. Most organizations over-invest in Compliance and Necessary Work and under-invest in Competitive Work. The conversation about categorization is often as valuable as the output.
+      </div>
+      <div class="work-cat-legend">
+        <div class="cat-badge cat-competitive">Competitive — Greatest Return</div>
+        <div class="cat-badge cat-enabling">Enabling — Supports Competitive</div>
+        <div class="cat-badge cat-necessary">Necessary — Keeps Lights On</div>
+        <div class="cat-badge cat-compliance">Compliance — Required, No Return</div>
+      </div>
+      <div class="guide-box">
+        <h4>Category Definitions</h4>
+        <ul>
+          <li><strong>Competitive:</strong> Directly creates competitive advantage and strategic value. Highest investment priority.</li>
+          <li><strong>Competitive Enabling:</strong> Supports and enables competitive work. Important but derivative.</li>
+          <li><strong>Necessary:</strong> Keeps the organization running. Efficient delivery is the goal — not investment.</li>
+          <li><strong>Compliance:</strong> Required by law/regulation. Minimize cost and effort — no strategic return.</li>
+        </ul>
+      </div>
+      <div class="table-wrapper">
+        <table id="workcat-table">
+          <thead>
+            <tr>
+              <th>Work Activity / Function</th>
+              <th>Category</th>
+              <th>% Est. Effort</th>
+              <th>Should Be</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="workcat-body"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="addRow('workcat')">+ Add Work Item</button>
+      <div class="form-col" style="margin-top:16px;">
+        <label>Key Insights & Reallocation Opportunities</label>
+        <textarea id="workcat-notes" rows="3" placeholder="Where is effort misaligned with strategic value? What should we do more or less of?" oninput="save()"></textarea>
+      </div>
+      <div class="tip-box">
+        <strong>Tip</strong>
+        Ask: "What would we stop doing if we had to cut 20% of effort?" Answers that feel unthinkable are often Compliance or Necessary work that has taken on false importance.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: PLACEMENT -->
+<div class="section" id="sec-placement">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Placement of Work</h2>
+      <p>Decide where work should live in the organization</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Placement decisions directly drive structure. Work that varies significantly by context stays decentralized (close to the client). Work that is identical everywhere benefits from standardization or centralization. Challenge assumptions — many orgs have work in the wrong place.
+      </div>
+      <div class="placement-legend">
+        <div class="place-badge place-unique">Unique / Decentralized — Context-specific</div>
+        <div class="place-badge place-standard">Standardized — Same everywhere</div>
+        <div class="place-badge place-shared">Shared / Centralized — Economies of scale</div>
+      </div>
+      <div class="guide-box">
+        <h4>Placement Decision Criteria</h4>
+        <ul>
+          <li><strong>Unique/Decentralized:</strong> Work varies significantly by region/client; local expertise essential; speed of response critical</li>
+          <li><strong>Standardized:</strong> Same process works everywhere; consistency is important; can be templated</li>
+          <li><strong>Shared/Centralized:</strong> Economies of scale; specialized expertise; compliance/risk management; infrequent need</li>
+        </ul>
+      </div>
+      <div class="table-wrapper">
+        <table id="placement-table">
+          <thead>
+            <tr>
+              <th>Work Activity</th>
+              <th>Category (from Work Cat.)</th>
+              <th>Current Placement</th>
+              <th>Proposed Placement</th>
+              <th>Rationale</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="placement-body"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="addRow('placement')">+ Add Work Item</button>
+      <div class="form-col" style="margin-top:16px;">
+        <label>Placement Decisions & Rationale</label>
+        <textarea id="placement-notes" rows="3" placeholder="Key placement decisions made, trade-offs considered, implementation implications..." oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: ORG RATIONALE -->
+<div class="section" id="sec-org-rationale">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Organizing Rationale</h2>
+      <p>Select the primary organizing logic and understand its trade-offs</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Every organizing rationale has benefits AND risks — there is no perfect structure. The goal is to choose the rationale that best supports the strategy and design criteria, then proactively mitigate its inherent risks through linkage mechanisms.
+      </div>
+      <div class="guide-box">
+        <h4>Guiding Questions</h4>
+        <ul>
+          <li>What is the primary organizing logic that best supports our strategy?</li>
+          <li>What are the inherent risks of this rationale, and how will we mitigate them?</li>
+          <li>Do we need a secondary rationale for certain parts of the organization?</li>
+        </ul>
+      </div>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Select the primary organizing rationale:</p>
+      <div class="rationale-grid" id="rationale-grid">
+        <div class="rationale-card" data-rationale="product" onclick="selectRationale('product')">
+          <h4>Product / Service</h4>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Organized by what you produce</div>
+          <div class="benefits">+ Deep product expertise; clear P&L; speed of delivery</div>
+          <div class="risks">- Duplication across units; poor cross-product coordination</div>
+        </div>
+        <div class="rationale-card" data-rationale="customer" onclick="selectRationale('customer')">
+          <h4>Customer / Client</h4>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Organized by who you serve</div>
+          <div class="benefits">+ Deep client knowledge; single point of contact; client focus</div>
+          <div class="risks">- Duplication of functional capability; inconsistent service standards</div>
+        </div>
+        <div class="rationale-card" data-rationale="function" onclick="selectRationale('function')">
+          <h4>Function</h4>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Organized by what you do</div>
+          <div class="benefits">+ Deep functional expertise; efficiency; career ladders; standards</div>
+          <div class="risks">- Siloes; slow cross-functional integration; client complexity</div>
+        </div>
+        <div class="rationale-card" data-rationale="process" onclick="selectRationale('process')">
+          <h4>Process</h4>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Organized by how work flows</div>
+          <div class="benefits">+ End-to-end accountability; speed; integration of steps</div>
+          <div class="risks">- Functional skills can atrophy; harder to staff; boundary management</div>
+        </div>
+        <div class="rationale-card" data-rationale="geography" onclick="selectRationale('geography')">
+          <h4>Geography</h4>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Organized by where you operate</div>
+          <div class="benefits">+ Local responsiveness; regulatory compliance; proximity to clients</div>
+          <div class="risks">- Inconsistency; duplication; limited economies of scale</div>
+        </div>
+        <div class="rationale-card" data-rationale="channel" onclick="selectRationale('channel')">
+          <h4>Channel</h4>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Organized by how you deliver</div>
+          <div class="benefits">+ Channel optimization; consistency of delivery experience</div>
+          <div class="risks">- Fragmented client experience; capability duplication</div>
+        </div>
+        <div class="rationale-card" data-rationale="shared" onclick="selectRationale('shared')">
+          <h4>Shared / Centralized</h4>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Pooled resources and services</div>
+          <div class="benefits">+ Economies of scale; consistency; specialized expertise; efficiency</div>
+          <div class="risks">- Distance from clients; slower response; service standardization tension</div>
+        </div>
+        <div class="rationale-card" data-rationale="dedicated" onclick="selectRationale('dedicated')">
+          <h4>Dedicated / Decentralized</h4>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Embedded resources in business units</div>
+          <div class="benefits">+ Proximity; responsiveness; deep client knowledge; integration</div>
+          <div class="risks">- Duplication; inconsistency; isolation; career development challenges</div>
+        </div>
+        <div class="rationale-card" data-rationale="virtual" onclick="selectRationale('virtual')">
+          <h4>Virtual / Network</h4>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Networked across formal structures</div>
+          <div class="benefits">+ Flexibility; cross-organizational capability; low overhead</div>
+          <div class="risks">- Accountability gaps; coordination burden; culture fragmentation</div>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:16px;">
+        <div class="form-col">
+          <label>Primary Organizing Rationale</label>
+          <input type="text" id="org-primary" placeholder="Selected rationale..." oninput="save()" readonly>
+        </div>
+        <div class="form-col">
+          <label>Secondary Rationale (if applicable)</label>
+          <input type="text" id="org-secondary" placeholder="e.g., Geography within a Function structure" oninput="save()">
+        </div>
+      </div>
+      <div class="form-col">
+        <label>Rationale for This Choice</label>
+        <textarea id="org-rationale-text" rows="3" placeholder="Why does this organizing rationale best support the strategy and design criteria?" oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>Risk Mitigation Strategies</label>
+        <textarea id="org-riskMit" rows="3" placeholder="How will you address the inherent weaknesses of this organizing rationale?" oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: LINKAGES -->
+<div class="section" id="sec-linkages">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Linkages Across Organizational Boundaries</h2>
+      <p>Design the mechanisms that connect work across the structure</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        No structure works in isolation. Linkage mechanisms connect across the silos that structure creates. Start with low-cost mechanisms and only add higher-cost ones where the coordination need is significant and persistent. Over-engineering linkages adds bureaucracy; under-engineering them creates gaps.
+      </div>
+      <div class="guide-box">
+        <h4>Guiding Questions</h4>
+        <ul>
+          <li>Where does work need to cross organizational boundaries?</li>
+          <li>What mechanisms currently exist, and are they sufficient?</li>
+          <li>What coordination gaps are causing problems today?</li>
+          <li>What is the appropriate cost/intensity of coordination for each gap?</li>
+        </ul>
+      </div>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Select mechanisms to activate (ordered low to high cost/capability):</p>
+      <div class="mechanism-grid" id="mechanism-grid">
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-rules" onchange="save()"> Rules, Policies &amp; Standards</label>
+          <div class="mechanism-cost">Lowest cost — establish shared expectations and guardrails</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-forums" onchange="save()"> Forums &amp; Communications</label>
+          <div class="mechanism-cost">Low cost — shared information and awareness across groups</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-hierarchy" onchange="save()"> Hierarchy (Escalation)</label>
+          <div class="mechanism-cost">Low cost — issues escalated to shared leader for resolution</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-informal" onchange="save()"> Informal Contacts &amp; Networks</label>
+          <div class="mechanism-cost">Low cost — relationship-based coordination; relies on social capital</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-tech" onchange="save()"> Technology &amp; Systems</label>
+          <div class="mechanism-cost">Moderate cost — shared platforms, workflows, or data systems</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-planning" onchange="save()"> Planning, Goals &amp; Measures</label>
+          <div class="mechanism-cost">Moderate cost — shared objectives that require joint effort to achieve</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-liaison" onchange="save()"> Job Expectations / Liaison / Job Exchange</label>
+          <div class="mechanism-cost">Moderate cost — roles explicitly include cross-boundary coordination</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-projects" onchange="save()"> Project Teams</label>
+          <div class="mechanism-cost">Moderate-high — temporary cross-functional teams for specific outcomes</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-culture" onchange="save()"> Culture, Values &amp; Operating Principles</label>
+          <div class="mechanism-cost">Moderate — shared behavioral norms reduce need for formal mechanisms</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-process-teams" onchange="save()"> Process Management Teams</label>
+          <div class="mechanism-cost">High — ongoing teams owning cross-boundary processes end-to-end</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-councils" onchange="save()"> Cross-discipline Teams &amp; Councils</label>
+          <div class="mechanism-cost">High — standing governance bodies for coordination and standards</div>
+        </div>
+        <div class="mechanism-item">
+          <label><input type="checkbox" id="mech-communities" onchange="save()"> Communities of Interest / Practice</label>
+          <div class="mechanism-cost">High — voluntary networks to share knowledge across functions</div>
+        </div>
+        <div class="mechanism-item" style="grid-column: span 2;">
+          <label><input type="checkbox" id="mech-matrix" onchange="save()"> Matrix Organization</label>
+          <div class="mechanism-cost">Highest cost &amp; capability — formal dual-authority structure; use when other mechanisms are insufficient</div>
+        </div>
+      </div>
+      <div class="form-col" style="margin-top:16px;">
+        <label>Selected Mechanisms — Rationale &amp; Application</label>
+        <textarea id="linkages-notes" rows="4" placeholder="For each selected mechanism: what coordination gap does it address, and how will it be implemented?" oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: RACI -->
+<div class="section" id="sec-raci">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>RACI Table</h2>
+      <p>Clarify decision-making accountability across roles</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        RACI clarifies who does what. Each decision/activity should have exactly ONE Accountable (A). Multiple R's can work but watch for diffusion of responsibility. Too many C's and I's creates bureaucracy — be selective about who needs to be consulted vs. simply informed.
+      </div>
+      <div class="guide-box">
+        <h4>RACI Definitions</h4>
+        <ul>
+          <li><strong>R — Responsible:</strong> Does the work. Executes the task.</li>
+          <li><strong>A — Accountable:</strong> Ultimately answerable for the outcome. Approves. Only ONE per decision.</li>
+          <li><strong>C — Consulted:</strong> Input sought before decisions are made. Two-way communication.</li>
+          <li><strong>I — Informed:</strong> Notified of decisions/outcomes. One-way communication.</li>
+        </ul>
+      </div>
+      <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+        <div>
+          <label style="margin-bottom:4px;">Add Role / Position</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="raci-role-input" placeholder="Role name..." style="width:200px;">
+            <button class="btn btn-outline btn-sm" onclick="addRaciRole()">Add Role</button>
+          </div>
+        </div>
+        <div>
+          <label style="margin-bottom:4px;">Add Decision / Activity</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="raci-decision-input" placeholder="Decision or activity..." style="width:200px;">
+            <button class="btn btn-outline btn-sm" onclick="addRaciDecision()">Add Row</button>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table id="raci-table">
+          <thead id="raci-head"></thead>
+          <tbody id="raci-body"></tbody>
+        </table>
+      </div>
+      <div class="form-col" style="margin-top:16px;">
+        <label>Key Assumptions &amp; Gaps</label>
+        <textarea id="raci-assumptions" rows="3" placeholder="Decision-making gaps identified, accountability conflicts, follow-up clarifications needed..." oninput="save()"></textarea>
+      </div>
+      <div class="tip-box">
+        <strong>Tip</strong>
+        If a row has no A, there's an accountability gap. If a column is full of R's, that role may be over-extended. If a decision has many C's, consider whether the consultation process is efficient.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: PROCESS EVAL -->
+<div class="section" id="sec-process-eval">
+  <div class="card">
+    <div class="card-header micro">
+      <h2>Process Evaluation</h2>
+      <p>Assess current processes and prioritize for redesign in the micro design phase</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        This bridges macro to micro design. The macro structure is set — now identify which processes within that structure are broken or misaligned and need detailed redesign. Prioritize by impact on competitive work and stakeholder value.
+      </div>
+      <div class="guide-box">
+        <h4>Guiding Questions</h4>
+        <ul>
+          <li>Which processes directly enable our differentiating activities?</li>
+          <li>Where are the biggest process breakdowns or inefficiencies?</li>
+          <li>Which processes cross the most organizational boundaries?</li>
+          <li>What is the timing for process redesign — now, next quarter, future?</li>
+        </ul>
+      </div>
+      <div class="table-wrapper">
+        <table id="process-table">
+          <thead>
+            <tr>
+              <th>Process / Workflow</th>
+              <th>Current State Assessment</th>
+              <th>Priority</th>
+              <th>Timing</th>
+              <th>Recommended Action</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="process-body"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="addRow('process')">+ Add Process</button>
+      <div class="form-col" style="margin-top:16px;">
+        <label>Notes &amp; Prioritization Rationale</label>
+        <textarea id="process-notes" rows="3" placeholder="Process redesign priorities, sequencing rationale, resource implications..." oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: ORG CHOICES -->
+<div class="section" id="sec-org-choices">
+  <div class="card">
+    <div class="card-header micro">
+      <h2>Aligning Organizing Choices</h2>
+      <p>Ensure all organizational systems are aligned and mutually reinforcing</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        This is the integration check. The Micro Design organizing systems must all point in the same direction. A misaligned system (e.g., structure says collaborate but rewards competition) will undermine the design. Use this to surface misalignments and plan interventions.
+      </div>
+      <div class="guide-box">
+        <h4>The Five Organizing Systems</h4>
+        <ul>
+          <li><strong>1. Work:</strong> What work gets done — activities, processes, volume</li>
+          <li><strong>2. Micro Structure:</strong> Roles, reporting, spans and layers, job design</li>
+          <li><strong>3. Information &amp; Metrics:</strong> What gets measured, reported, and how decisions are made</li>
+          <li><strong>4. People &amp; Rewards:</strong> Who does the work, capabilities needed, how they are recognized</li>
+          <li><strong>5. Continuous Improvement:</strong> How the organization learns and adapts over time</li>
+        </ul>
+      </div>
+      <div class="form-col">
+        <label>1. Work — Key Decisions &amp; Current State</label>
+        <textarea id="choices-work" rows="3" placeholder="What work is in scope? What changes to the work itself are needed? Volume, mix, priorities..." oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>2. Micro Structure — Key Decisions &amp; Gaps</label>
+        <textarea id="choices-structure" rows="3" placeholder="Role redesign needed, reporting relationships, spans and layers, team configurations..." oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>3. Information &amp; Metrics — Alignment Assessment</label>
+        <textarea id="choices-information" rows="3" placeholder="What metrics will reinforce the new design? What information flows need to change? Decision rights gaps..." oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>4. People &amp; Rewards — Capability &amp; Recognition</label>
+        <textarea id="choices-people" rows="3" placeholder="Capability gaps to address, hiring implications, reward system alignment, performance management changes..." oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>5. Continuous Improvement — Learning Mechanisms</label>
+        <textarea id="choices-ci" rows="3" placeholder="How will the organization monitor its own effectiveness? Feedback loops, review cycles, adaptation mechanisms..." oninput="save()"></textarea>
+      </div>
+      <div class="form-col">
+        <label>Misalignments Identified</label>
+        <textarea id="choices-misalignments" rows="3" placeholder="Where do the five systems work against each other? What needs to be resolved?" oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: SUMMARY -->
+<div class="section" id="sec-summary">
+  <div class="card">
+    <div class="card-header">
+      <h2>Session Summary &amp; Export</h2>
+      <p>Review all decisions and export the session output</p>
+    </div>
+    <div class="card-body">
+      <div class="btn-group" style="margin-bottom:20px;">
+        <button class="btn btn-primary" onclick="printSummary()">Print / Save as PDF</button>
+        <button class="btn btn-outline" onclick="exportJSON()">Export JSON</button>
+        <button class="btn btn-outline" onclick="importJSON()">Import JSON</button>
+        <button class="btn btn-danger btn-sm" onclick="clearAll()">Clear Session</button>
+      </div>
+      <div id="summary-content"></div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<div id="bottom-bar">
+  <span style="font-size:12px; color:var(--text-muted);" id="save-status">Changes saved automatically</span>
+  <div class="btn-group" style="margin:0;">
+    <button class="btn btn-outline btn-sm" onclick="prevSection()">&#8592; Previous</button>
+    <button class="btn btn-primary btn-sm" onclick="nextSection()">Next &#8594;</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const SECTIONS = ['setup','diagnostic','gap','stakeholder','anchor','diff-activities','design-criteria','culture-behaviors','business-model','work-cat','placement','org-rationale','linkages','raci','process-eval','org-choices','summary'];
+let currentSection = 'setup';
+
+const defaultState = () => ({
+  meta: { orgName:'', date:'', facilitator:'', participants:'', scope:'', objectives:'', designScope:'' },
+  diagnostic: { results:'', strategy:'', systemic:'', culture:'', macro:'', micro:'', ci:'', notes:'' },
+  gap: { rows:[], keyQuestions:'' },
+  stakeholder: { rows:[], notes:'' },
+  anchor: { audience:'', need:'', channel:'', omit:'', revenue:'', evo:'', notes:'' },
+  diff: { offering:'', rows:[], notes:'' },
+  criteria: { rows:[], nonneg:'', notes:'' },
+  culture: { results:'', rows:[], notes:'' },
+  bm: { description:'', keyProcesses:'', dependencies:'', notes:'' },
+  workcat: { rows:[], notes:'' },
+  placement: { rows:[], notes:'' },
+  orgRationale: { primary:'', secondary:'', rationale:'', riskMit:'' },
+  linkages: { selected:{}, notes:'' },
+  raci: { roles:[], decisions:[], matrix:{}, assumptions:'' },
+  process: { rows:[], notes:'' },
+  choices: { work:'', structure:'', information:'', people:'', ci:'', misalignments:'' }
+});
+
+let state = defaultState();
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function nav(section) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + section).classList.add('active');
+  document.getElementById('nav-' + section).classList.add('active');
+  currentSection = section;
+  updateProgress();
+  if (section === 'summary') renderSummary();
+  window.scrollTo(0, 0);
+}
+
+function nextSection() {
+  const idx = SECTIONS.indexOf(currentSection);
+  if (idx < SECTIONS.length - 1) nav(SECTIONS[idx + 1]);
+}
+
+function prevSection() {
+  const idx = SECTIONS.indexOf(currentSection);
+  if (idx > 0) nav(SECTIONS[idx - 1]);
+}
+
+function updateProgress() {
+  const idx = SECTIONS.indexOf(currentSection);
+  const pct = Math.round(((idx + 1) / SECTIONS.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+let saveTimer = null;
+function save() {
+  collectFormState();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    localStorage.setItem('od-tool-state', JSON.stringify(state));
+    const el = document.getElementById('save-status');
+    el.textContent = 'Saved ' + new Date().toLocaleTimeString();
+    updateDots();
+    updateOrgName();
+  }, 500);
+}
+
+function loadState() {
+  const saved = localStorage.getItem('od-tool-state');
+  if (saved) {
+    try { state = Object.assign(defaultState(), JSON.parse(saved)); } catch(e) {}
+  }
+  applyStateToForm();
+  updateDots();
+  updateOrgName();
+  renderAllTables();
+  renderRaci();
+}
+
+function collectFormState() {
+  // meta
+  ['orgName','date','facilitator','participants','scope','objectives','designScope'].forEach(k => {
+    const el = document.getElementById('meta-' + k);
+    if (el) state.meta[k] = el.value;
+  });
+  // diagnostic radio
+  ['results','strategy','systemic','culture','macro','micro','ci'].forEach(k => {
+    const el = document.querySelector('input[name="diag-' + k + '"]:checked');
+    if (el) state.diagnostic[k] = el.value;
+  });
+  const diagNotes = document.getElementById('diag-notes');
+  if (diagNotes) state.diagnostic.notes = diagNotes.value;
+  // anchor
+  ['audience','need','channel','omit','revenue','evo','notes'].forEach(k => {
+    const el = document.getElementById('anchor-' + k);
+    if (el) state.anchor[k] = el.value;
+  });
+  // diff
+  const diffOff = document.getElementById('diff-offering');
+  if (diffOff) state.diff.offering = diffOff.value;
+  const diffNotes = document.getElementById('diff-notes');
+  if (diffNotes) state.diff.notes = diffNotes.value;
+  // criteria
+  const critNonneg = document.getElementById('criteria-nonneg');
+  if (critNonneg) state.criteria.nonneg = critNonneg.value;
+  const critNotes = document.getElementById('criteria-notes');
+  if (critNotes) state.criteria.notes = critNotes.value;
+  // culture
+  const cultRes = document.getElementById('culture-results');
+  if (cultRes) state.culture.results = cultRes.value;
+  const cultNotes = document.getElementById('culture-notes');
+  if (cultNotes) state.culture.notes = cultNotes.value;
+  // business model
+  ['description','keyProcesses','dependencies','notes'].forEach(k => {
+    const el = document.getElementById('bm-' + k);
+    if (el) state.bm[k] = el.value;
+  });
+  // workcat notes
+  const wcNotes = document.getElementById('workcat-notes');
+  if (wcNotes) state.workcat.notes = wcNotes.value;
+  // placement notes
+  const plNotes = document.getElementById('placement-notes');
+  if (plNotes) state.placement.notes = plNotes.value;
+  // org rationale
+  ['secondary','rationale-text','riskMit'].forEach(k => {
+    const el = document.getElementById('org-' + k);
+    if (el) {
+      const stateKey = k === 'rationale-text' ? 'rationale' : (k === 'riskMit' ? 'riskMit' : k);
+      state.orgRationale[stateKey] = el.value;
+    }
+  });
+  // linkages
+  const mechs = ['rules','forums','hierarchy','informal','tech','planning','liaison','projects','culture','process-teams','councils','communities','matrix'];
+  mechs.forEach(m => {
+    const el = document.getElementById('mech-' + m);
+    if (el) state.linkages.selected[m] = el.checked;
+  });
+  const lnNotes = document.getElementById('linkages-notes');
+  if (lnNotes) state.linkages.notes = lnNotes.value;
+  // raci
+  const raciAssump = document.getElementById('raci-assumptions');
+  if (raciAssump) state.raci.assumptions = raciAssump.value;
+  // process
+  const procNotes = document.getElementById('process-notes');
+  if (procNotes) state.process.notes = procNotes.value;
+  // choices
+  ['work','structure','information','people','ci','misalignments'].forEach(k => {
+    const el = document.getElementById('choices-' + k);
+    if (el) state.choices[k] = el.value;
+  });
+  // gap
+  const gkq = document.getElementById('gap-keyQuestions');
+  if (gkq) state.gap.keyQuestions = gkq.value;
+  // stakeholder
+  const stnotes = document.getElementById('stakeholder-notes');
+  if (stnotes) state.stakeholder.notes = stnotes.value;
+}
+
+function applyStateToForm() {
+  ['orgName','date','facilitator','participants','scope','objectives','designScope'].forEach(k => {
+    const el = document.getElementById('meta-' + k);
+    if (el) el.value = state.meta[k] || '';
+  });
+  ['results','strategy','systemic','culture','macro','micro','ci'].forEach(k => {
+    if (state.diagnostic[k]) {
+      const el = document.querySelector('input[name="diag-' + k + '"][value="' + state.diagnostic[k] + '"]');
+      if (el) el.checked = true;
+    }
+  });
+  const diagNotes = document.getElementById('diag-notes');
+  if (diagNotes) diagNotes.value = state.diagnostic.notes || '';
+  ['audience','need','channel','omit','revenue','evo','notes'].forEach(k => {
+    const el = document.getElementById('anchor-' + k);
+    if (el) el.value = state.anchor[k] || '';
+  });
+  const diffOff = document.getElementById('diff-offering');
+  if (diffOff) diffOff.value = state.diff.offering || '';
+  const diffNotes = document.getElementById('diff-notes');
+  if (diffNotes) diffNotes.value = state.diff.notes || '';
+  const critNonneg = document.getElementById('criteria-nonneg');
+  if (critNonneg) critNonneg.value = state.criteria.nonneg || '';
+  const critNotes = document.getElementById('criteria-notes');
+  if (critNotes) critNotes.value = state.criteria.notes || '';
+  const cultRes = document.getElementById('culture-results');
+  if (cultRes) cultRes.value = state.culture.results || '';
+  const cultNotes = document.getElementById('culture-notes');
+  if (cultNotes) cultNotes.value = state.culture.notes || '';
+  ['description','keyProcesses','dependencies','notes'].forEach(k => {
+    const el = document.getElementById('bm-' + k);
+    if (el) el.value = state.bm[k] || '';
+  });
+  const wcNotes = document.getElementById('workcat-notes');
+  if (wcNotes) wcNotes.value = state.workcat.notes || '';
+  const plNotes = document.getElementById('placement-notes');
+  if (plNotes) plNotes.value = state.placement.notes || '';
+  const orgSec = document.getElementById('org-secondary');
+  if (orgSec) orgSec.value = state.orgRationale.secondary || '';
+  const orgRat = document.getElementById('org-rationale-text');
+  if (orgRat) orgRat.value = state.orgRationale.rationale || '';
+  const orgRisk = document.getElementById('org-riskMit');
+  if (orgRisk) orgRisk.value = state.orgRationale.riskMit || '';
+  const orgPrimary = document.getElementById('org-primary');
+  if (orgPrimary) orgPrimary.value = state.orgRationale.primary || '';
+  if (state.orgRationale.primary) {
+    document.querySelectorAll('.rationale-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.rationale === state.orgRationale.primary);
+    });
+  }
+  const mechs = ['rules','forums','hierarchy','informal','tech','planning','liaison','projects','culture','process-teams','councils','communities','matrix'];
+  mechs.forEach(m => {
+    const el = document.getElementById('mech-' + m);
+    if (el) el.checked = !!(state.linkages.selected[m]);
+  });
+  const lnNotes = document.getElementById('linkages-notes');
+  if (lnNotes) lnNotes.value = state.linkages.notes || '';
+  const raciAssump = document.getElementById('raci-assumptions');
+  if (raciAssump) raciAssump.value = state.raci.assumptions || '';
+  const procNotes = document.getElementById('process-notes');
+  if (procNotes) procNotes.value = state.process.notes || '';
+  ['work','structure','information','people','ci','misalignments'].forEach(k => {
+    const el = document.getElementById('choices-' + k);
+    if (el) el.value = state.choices[k] || '';
+  });
+  const gkq = document.getElementById('gap-keyQuestions');
+  if (gkq) gkq.value = state.gap.keyQuestions || '';
+  const stnotes = document.getElementById('stakeholder-notes');
+  if (stnotes) stnotes.value = state.stakeholder.notes || '';
+}
+
+function updateOrgName() {
+  const el = document.getElementById('org-name-display');
+  if (el) el.textContent = state.meta.orgName || 'New Session';
+}
+
+function updateDots() {
+  const checks = {
+    setup: () => state.meta.orgName || state.meta.objectives,
+    diagnostic: () => state.diagnostic.results,
+    gap: () => state.gap.rows.length > 0,
+    stakeholder: () => state.stakeholder.rows.length > 0,
+    anchor: () => state.anchor.audience || state.anchor.need,
+    'diff-activities': () => state.diff.rows.length > 0,
+    'design-criteria': () => state.criteria.rows.length > 0,
+    'culture-behaviors': () => state.culture.rows.length > 0,
+    'business-model': () => state.bm.description,
+    'work-cat': () => state.workcat.rows.length > 0,
+    placement: () => state.placement.rows.length > 0,
+    'org-rationale': () => state.orgRationale.primary,
+    linkages: () => Object.values(state.linkages.selected).some(v => v),
+    raci: () => state.raci.decisions.length > 0,
+    'process-eval': () => state.process.rows.length > 0,
+    'org-choices': () => state.choices.work || state.choices.structure,
+    summary: () => false
+  };
+  SECTIONS.forEach(s => {
+    const dot = document.getElementById('dot-' + s);
+    if (!dot) return;
+    dot.classList.remove('complete','partial');
+    if (checks[s] && checks[s]()) dot.classList.add('complete');
+  });
+}
+
+// ============================================================
+// DYNAMIC TABLES
+// ============================================================
+function addRow(type) {
+  const id = Date.now();
+  switch(type) {
+    case 'gap':
+      state.gap.rows.push({id, stakeholder:'', currentResults:'', desiredResults:'', gap:''});
+      renderGapTable(); break;
+    case 'stakeholder':
+      state.stakeholder.rows.push({id, name:'', requirements:'', performance:'', priority:'High'});
+      renderStakeholderTable(); break;
+    case 'diff':
+      state.diff.rows.push({id, activity:'', howDifferent:'', resources:''});
+      renderDiffTable(); break;
+    case 'criteria':
+      state.criteria.rows.push({id, criterion:'', meaningful:'Yes', applicable:'Yes', measurable:'Yes', priority:'High'});
+      renderCriteriaTable(); break;
+    case 'culture':
+      state.culture.rows.push({id, behavior:'', implications:''});
+      renderCultureTable(); break;
+    case 'workcat':
+      state.workcat.rows.push({id, activity:'', category:'Necessary', effort:'', shouldBe:'', notes:''});
+      renderWorkcatTable(); break;
+    case 'placement':
+      state.placement.rows.push({id, activity:'', category:'', current:'', proposed:'Unique/Decentralized', rationale:''});
+      renderPlacementTable(); break;
+    case 'process':
+      state.process.rows.push({id, process:'', assessment:'', priority:'Medium', timing:'Now', action:''});
+      renderProcessTable(); break;
+  }
+  save();
+}
+
+function removeRow(type, id) {
+  const map = { gap:'gap', stakeholder:'stakeholder', diff:'diff', criteria:'criteria', culture:'culture', workcat:'workcat', placement:'placement', process:'process' };
+  const key = map[type];
+  if (key) { state[key].rows = state[key].rows.filter(r => r.id !== id); }
+  renderAllTables();
+  save();
+}
+
+function renderAllTables() {
+  renderGapTable();
+  renderStakeholderTable();
+  renderDiffTable();
+  renderCriteriaTable();
+  renderCultureTable();
+  renderWorkcatTable();
+  renderPlacementTable();
+  renderProcessTable();
+}
+
+function renderGapTable() {
+  const tbody = document.getElementById('gap-body');
+  if (!tbody) return;
+  tbody.innerHTML = state.gap.rows.map(r => `
+    <tr>
+      <td><input value="${esc(r.stakeholder)}" onchange="updateRow('gap',${r.id},'stakeholder',this.value)" placeholder="Stakeholder group..."></td>
+      <td><textarea onchange="updateRow('gap',${r.id},'currentResults',this.value)">${esc(r.currentResults)}</textarea></td>
+      <td><textarea onchange="updateRow('gap',${r.id},'desiredResults',this.value)">${esc(r.desiredResults)}</textarea></td>
+      <td><textarea onchange="updateRow('gap',${r.id},'gap',this.value)">${esc(r.gap)}</textarea></td>
+      <td><button class="delete-btn" onclick="removeRow('gap',${r.id})">×</button></td>
+    </tr>`).join('');
+}
+
+function renderStakeholderTable() {
+  const tbody = document.getElementById('stakeholder-body');
+  if (!tbody) return;
+  tbody.innerHTML = state.stakeholder.rows.map(r => `
+    <tr>
+      <td><input value="${esc(r.name)}" onchange="updateRow('stakeholder',${r.id},'name',this.value)" placeholder="Stakeholder..."></td>
+      <td><textarea onchange="updateRow('stakeholder',${r.id},'requirements',this.value)">${esc(r.requirements)}</textarea></td>
+      <td><input value="${esc(r.performance)}" onchange="updateRow('stakeholder',${r.id},'performance',this.value)" placeholder="Strong / Partial / Weak"></td>
+      <td><select onchange="updateRow('stakeholder',${r.id},'priority',this.value)">
+        ${['Critical','High','Medium','Low'].map(o => `<option ${r.priority===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><button class="delete-btn" onclick="removeRow('stakeholder',${r.id})">×</button></td>
+    </tr>`).join('');
+}
+
+function renderDiffTable() {
+  const tbody = document.getElementById('diff-body');
+  if (!tbody) return;
+  tbody.innerHTML = state.diff.rows.map(r => `
+    <tr>
+      <td><textarea onchange="updateRow('diff',${r.id},'activity',this.value)">${esc(r.activity)}</textarea></td>
+      <td><textarea onchange="updateRow('diff',${r.id},'howDifferent',this.value)">${esc(r.howDifferent)}</textarea></td>
+      <td><textarea onchange="updateRow('diff',${r.id},'resources',this.value)">${esc(r.resources)}</textarea></td>
+      <td><button class="delete-btn" onclick="removeRow('diff',${r.id})">×</button></td>
+    </tr>`).join('');
+}
+
+function renderCriteriaTable() {
+  const tbody = document.getElementById('criteria-body');
+  if (!tbody) return;
+  tbody.innerHTML = state.criteria.rows.map(r => `
+    <tr>
+      <td><textarea onchange="updateRow('criteria',${r.id},'criterion',this.value)">${esc(r.criterion)}</textarea></td>
+      <td><select onchange="updateRow('criteria',${r.id},'meaningful',this.value)">${yesNo(r.meaningful)}</select></td>
+      <td><select onchange="updateRow('criteria',${r.id},'applicable',this.value)">${yesNo(r.applicable)}</select></td>
+      <td><select onchange="updateRow('criteria',${r.id},'measurable',this.value)">${yesNo(r.measurable)}</select></td>
+      <td><select onchange="updateRow('criteria',${r.id},'priority',this.value)">
+        ${['Critical','High','Medium','Low'].map(o => `<option ${r.priority===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><button class="delete-btn" onclick="removeRow('criteria',${r.id})">×</button></td>
+    </tr>`).join('');
+}
+
+function renderCultureTable() {
+  const tbody = document.getElementById('culture-body');
+  if (!tbody) return;
+  tbody.innerHTML = state.culture.rows.map(r => `
+    <tr>
+      <td><textarea onchange="updateRow('culture',${r.id},'behavior',this.value)">${esc(r.behavior)}</textarea></td>
+      <td><textarea onchange="updateRow('culture',${r.id},'implications',this.value)">${esc(r.implications)}</textarea></td>
+      <td><button class="delete-btn" onclick="removeRow('culture',${r.id})">×</button></td>
+    </tr>`).join('');
+}
+
+function renderWorkcatTable() {
+  const tbody = document.getElementById('workcat-body');
+  if (!tbody) return;
+  tbody.innerHTML = state.workcat.rows.map(r => `
+    <tr>
+      <td><textarea onchange="updateRow('workcat',${r.id},'activity',this.value)">${esc(r.activity)}</textarea></td>
+      <td><select onchange="updateRow('workcat',${r.id},'category',this.value)">
+        ${['Competitive','Competitive Enabling','Necessary','Compliance'].map(o => `<option ${r.category===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><input type="text" value="${esc(r.effort)}" onchange="updateRow('workcat',${r.id},'effort',this.value)" placeholder="e.g. 30%"></td>
+      <td><select onchange="updateRow('workcat',${r.id},'shouldBe',this.value)">
+        <option value="">—</option>
+        ${['Competitive','Competitive Enabling','Necessary','Compliance','Eliminate'].map(o => `<option ${r.shouldBe===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><input value="${esc(r.notes)}" onchange="updateRow('workcat',${r.id},'notes',this.value)"></td>
+      <td><button class="delete-btn" onclick="removeRow('workcat',${r.id})">×</button></td>
+    </tr>`).join('');
+}
+
+function renderPlacementTable() {
+  const tbody = document.getElementById('placement-body');
+  if (!tbody) return;
+  tbody.innerHTML = state.placement.rows.map(r => `
+    <tr>
+      <td><textarea onchange="updateRow('placement',${r.id},'activity',this.value)">${esc(r.activity)}</textarea></td>
+      <td><select onchange="updateRow('placement',${r.id},'category',this.value)">
+        <option value="">—</option>
+        ${['Competitive','Competitive Enabling','Necessary','Compliance'].map(o => `<option ${r.category===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><select onchange="updateRow('placement',${r.id},'current',this.value)">
+        <option value="">—</option>
+        ${['Unique/Decentralized','Standardized','Shared/Centralized'].map(o => `<option ${r.current===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><select onchange="updateRow('placement',${r.id},'proposed',this.value)">
+        ${['Unique/Decentralized','Standardized','Shared/Centralized'].map(o => `<option ${r.proposed===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><textarea onchange="updateRow('placement',${r.id},'rationale',this.value)">${esc(r.rationale)}</textarea></td>
+      <td><button class="delete-btn" onclick="removeRow('placement',${r.id})">×</button></td>
+    </tr>`).join('');
+}
+
+function renderProcessTable() {
+  const tbody = document.getElementById('process-body');
+  if (!tbody) return;
+  tbody.innerHTML = state.process.rows.map(r => `
+    <tr>
+      <td><textarea onchange="updateRow('process',${r.id},'process',this.value)">${esc(r.process)}</textarea></td>
+      <td><textarea onchange="updateRow('process',${r.id},'assessment',this.value)">${esc(r.assessment)}</textarea></td>
+      <td><select onchange="updateRow('process',${r.id},'priority',this.value)">
+        ${['Critical','High','Medium','Low'].map(o => `<option ${r.priority===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><select onchange="updateRow('process',${r.id},'timing',this.value)">
+        ${['Now','Next Quarter','Future','Monitor'].map(o => `<option ${r.timing===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><textarea onchange="updateRow('process',${r.id},'action',this.value)">${esc(r.action)}</textarea></td>
+      <td><button class="delete-btn" onclick="removeRow('process',${r.id})">×</button></td>
+    </tr>`).join('');
+}
+
+function updateRow(type, id, field, value) {
+  const keyMap = { diff:'diff', criteria:'criteria', culture:'culture', workcat:'workcat', placement:'placement', process:'process' };
+  const key = keyMap[type] || type;
+  const row = state[key].rows.find(r => r.id === id);
+  if (row) { row[field] = value; save(); }
+}
+
+// ============================================================
+// RACI
+// ============================================================
+function addRaciRole() {
+  const input = document.getElementById('raci-role-input');
+  const name = input.value.trim();
+  if (!name) return;
+  if (!state.raci.roles.includes(name)) { state.raci.roles.push(name); }
+  input.value = '';
+  renderRaci();
+  save();
+}
+
+function addRaciDecision() {
+  const input = document.getElementById('raci-decision-input');
+  const name = input.value.trim();
+  if (!name) return;
+  if (!state.raci.decisions.includes(name)) { state.raci.decisions.push(name); }
+  input.value = '';
+  renderRaci();
+  save();
+}
+
+function removeRaciRole(role) {
+  state.raci.roles = state.raci.roles.filter(r => r !== role);
+  renderRaci(); save();
+}
+
+function removeRaciDecision(decision) {
+  state.raci.decisions = state.raci.decisions.filter(d => d !== decision);
+  delete state.raci.matrix[decision];
+  renderRaci(); save();
+}
+
+function setRaciCell(decision, role, value) {
+  if (!state.raci.matrix[decision]) state.raci.matrix[decision] = {};
+  state.raci.matrix[decision][role] = value;
+  const key = `raci-${btoa(decision+role).replace(/[^a-z0-9]/gi,'')}`;
+  const sel = document.getElementById(key);
+  if (sel) { sel.className = 'raci-select raci-' + (value || 'none'); }
+  save();
+}
+
+function renderRaci() {
+  const head = document.getElementById('raci-head');
+  const body = document.getElementById('raci-body');
+  if (!head || !body) return;
+  head.innerHTML = '<tr><th>Decision / Activity</th>' +
+    state.raci.roles.map(r => `<th style="text-align:center;">${esc(r)} <button class="delete-btn" onclick="removeRaciRole('${esc(r)}')" style="font-size:10px;">×</button></th>`).join('') +
+    '<th></th></tr>';
+  body.innerHTML = state.raci.decisions.map(d => {
+    const cells = state.raci.roles.map(r => {
+      const val = (state.raci.matrix[d] || {})[r] || '';
+      const key = `raci-${btoa(d+r).replace(/[^a-z0-9]/gi,'')}`;
+      return `<td class="raci-cell"><select id="${key}" class="raci-select raci-${val||'none'}" onchange="setRaciCell('${esc(d)}','${esc(r)}',this.value)">
+        <option value="">—</option>
+        <option value="R" ${val==='R'?'selected':''}>R</option>
+        <option value="A" ${val==='A'?'selected':''}>A</option>
+        <option value="C" ${val==='C'?'selected':''}>C</option>
+        <option value="I" ${val==='I'?'selected':''}>I</option>
+      </select></td>`;
+    }).join('');
+    return `<tr><td>${esc(d)}</td>${cells}<td><button class="delete-btn" onclick="removeRaciDecision('${esc(d)}')">×</button></td></tr>`;
+  }).join('');
+}
+
+// ============================================================
+// ORGANIZING RATIONALE
+// ============================================================
+function selectRationale(r) {
+  document.querySelectorAll('.rationale-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.rationale-card[data-rationale="${r}"]`).classList.add('selected');
+  const labels = { product:'Product / Service', customer:'Customer / Client', function:'Function', process:'Process', geography:'Geography', channel:'Channel', shared:'Shared / Centralized', dedicated:'Dedicated / Decentralized', virtual:'Virtual / Network' };
+  document.getElementById('org-primary').value = labels[r] || r;
+  state.orgRationale.primary = labels[r] || r;
+  save();
+}
+
+// ============================================================
+// FACILITATOR MODE
+// ============================================================
+function toggleFacMode() {
+  document.body.classList.toggle('fac-mode', document.getElementById('fac-mode-cb').checked);
+}
+
+// ============================================================
+// DIAGNOSTIC
+// ============================================================
+function saveDiag() { save(); }
+
+// ============================================================
+// SUMMARY
+// ============================================================
+function renderSummary() {
+  collectFormState();
+  const el = document.getElementById('summary-content');
+  if (!el) return;
+
+  const field = (label, value) => value
+    ? `<div class="summary-field"><span class="label">${label}</span><span>${esc(value)}</span></div>`
+    : '';
+
+  const tableSection = (title, rows, cols) => rows.length === 0 ? '' : `
+    <div class="summary-section">
+      <h3>${title}</h3>
+      <div class="table-wrapper"><table>
+        <thead><tr>${cols.map(c => `<th>${c.label}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(r => `<tr>${cols.map(c => `<td>${esc(r[c.key]||'')}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+
+  const activeMechs = Object.entries(state.linkages.selected).filter(([,v]) => v).map(([k]) => k).join(', ');
+  const diagSummary = ['results','strategy','systemic','culture','macro','micro','ci'].map(k => `${k}: ${state.diagnostic[k]||'—'}`).join(' | ');
+
+  el.innerHTML = `
+    <div class="summary-section">
+      <h3>Session Information</h3>
+      ${field('Organization', state.meta.orgName)}
+      ${field('Date', state.meta.date)}
+      ${field('Facilitator', state.meta.facilitator)}
+      ${field('Participants', state.meta.participants)}
+      ${field('Scope', state.meta.scope)}
+      ${field('Objectives', state.meta.objectives)}
+      ${field('Design Constraints', state.meta.designScope)}
+    </div>
+    <div class="summary-section">
+      <h3>Diagnostic Summary</h3>
+      ${field('Responses', diagSummary)}
+      ${field('Notes', state.diagnostic.notes)}
+    </div>
+    ${tableSection('Gap Analysis', state.gap.rows, [{label:'Stakeholder',key:'stakeholder'},{label:'Current Results',key:'currentResults'},{label:'Desired Results',key:'desiredResults'},{label:'Gap',key:'gap'}])}
+    ${field('Gap Analysis — Key Questions', state.gap.keyQuestions) ? `<div class="summary-section"><h3>Gap Analysis Notes</h3>${field('Key Questions', state.gap.keyQuestions)}</div>` : ''}
+    ${tableSection('Stakeholder Analysis', state.stakeholder.rows, [{label:'Stakeholder',key:'name'},{label:'Requirements',key:'requirements'},{label:'Performance',key:'performance'},{label:'Priority',key:'priority'}])}
+    <div class="summary-section">
+      <h3>ANCHOR / Value Offering</h3>
+      ${field('Audience', state.anchor.audience)}
+      ${field('Need', state.anchor.need)}
+      ${field('Channel', state.anchor.channel)}
+      ${field('Omit', state.anchor.omit)}
+      ${field('Revenue / Return', state.anchor.revenue)}
+      ${field('Employee Value Offering', state.anchor.evo)}
+    </div>
+    ${tableSection('Differentiating Activities', state.diff.rows, [{label:'Activity',key:'activity'},{label:'How Different',key:'howDifferent'},{label:'Resources',key:'resources'}])}
+    ${tableSection('Design Criteria', state.criteria.rows, [{label:'Criterion',key:'criterion'},{label:'Meaningful',key:'meaningful'},{label:'Applicable',key:'applicable'},{label:'Priority',key:'priority'}])}
+    ${field('Non-Negotiables', state.criteria.nonneg) ? `<div class="summary-section"><h3>Design Non-Negotiables</h3>${field('Non-Negotiables', state.criteria.nonneg)}</div>` : ''}
+    ${tableSection('Strategic Culture Behaviors', state.culture.rows, [{label:'Behavior',key:'behavior'},{label:'Organizational Implications',key:'implications'}])}
+    <div class="summary-section">
+      <h3>Business Model</h3>
+      ${field('Description', state.bm.description)}
+      ${field('Key Processes', state.bm.keyProcesses)}
+      ${field('Dependencies', state.bm.dependencies)}
+    </div>
+    ${tableSection('Work Categorization', state.workcat.rows, [{label:'Activity',key:'activity'},{label:'Category',key:'category'},{label:'Est. Effort',key:'effort'},{label:'Should Be',key:'shouldBe'}])}
+    ${tableSection('Placement of Work', state.placement.rows, [{label:'Activity',key:'activity'},{label:'Category',key:'category'},{label:'Current',key:'current'},{label:'Proposed',key:'proposed'},{label:'Rationale',key:'rationale'}])}
+    <div class="summary-section">
+      <h3>Organizing Rationale</h3>
+      ${field('Primary Rationale', state.orgRationale.primary)}
+      ${field('Secondary Rationale', state.orgRationale.secondary)}
+      ${field('Rationale', state.orgRationale.rationale)}
+      ${field('Risk Mitigation', state.orgRationale.riskMit)}
+    </div>
+    <div class="summary-section">
+      <h3>Linkage Mechanisms Selected</h3>
+      ${field('Active Mechanisms', activeMechs || 'None selected')}
+      ${field('Notes', state.linkages.notes)}
+    </div>
+    ${state.raci.decisions.length > 0 ? `<div class="summary-section"><h3>RACI — Decisions</h3><p style="font-size:13px; color:var(--text-muted);">Roles: ${state.raci.roles.join(', ')||'None'}</p><p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Decisions: ${state.raci.decisions.join(', ')}</p>${field('Assumptions', state.raci.assumptions)}</div>` : ''}
+    ${tableSection('Process Evaluation', state.process.rows, [{label:'Process',key:'process'},{label:'Assessment',key:'assessment'},{label:'Priority',key:'priority'},{label:'Timing',key:'timing'},{label:'Action',key:'action'}])}
+    <div class="summary-section">
+      <h3>Aligning Organizing Choices</h3>
+      ${field('1. Work', state.choices.work)}
+      ${field('2. Micro Structure', state.choices.structure)}
+      ${field('3. Information & Metrics', state.choices.information)}
+      ${field('4. People & Rewards', state.choices.people)}
+      ${field('5. Continuous Improvement', state.choices.ci)}
+      ${field('Misalignments', state.choices.misalignments)}
+    </div>
+  `;
+}
+
+// ============================================================
+// EXPORT / IMPORT
+// ============================================================
+function exportJSON() {
+  collectFormState();
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'od-session-' + (state.meta.orgName || 'export').replace(/\s+/g,'-') + '.json';
+  a.click();
+}
+
+function importJSON() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        state = Object.assign(defaultState(), JSON.parse(ev.target.result));
+        applyStateToForm();
+        renderAllTables();
+        renderRaci();
+        updateDots();
+        updateOrgName();
+        alert('Session imported successfully.');
+      } catch(err) { alert('Import failed: invalid JSON file.'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function clearAll() {
+  if (!confirm('Clear all session data? This cannot be undone.')) return;
+  state = defaultState();
+  localStorage.removeItem('od-tool-state');
+  applyStateToForm();
+  renderAllTables();
+  renderRaci();
+  updateDots();
+  updateOrgName();
+  nav('setup');
+}
+
+function printSummary() {
+  renderSummary();
+  nav('summary');
+  setTimeout(() => window.print(), 300);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function yesNo(val) {
+  return ['Yes','No','Partial'].map(o => `<option ${val===o?'selected':''}>${o}</option>`).join('');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  nav('setup');
+  // Set today's date if empty
+  const dateEl = document.getElementById('meta-date');
+  if (dateEl && !dateEl.value) {
+    dateEl.value = new Date().toISOString().split('T')[0];
+    save();
+  }
+});
+</script>
+</body>
+</html>
