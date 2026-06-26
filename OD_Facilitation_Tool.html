@@ -45,6 +45,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .nav-item:hover { background: rgba(255,255,255,0.08); }
 .nav-item.active { background: rgba(255,255,255,0.15); border-left-color: var(--accent); }
 .nav-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0; transition: all 0.2s; }
+.nav-item.nav-recommended::after { content: "●"; color: var(--accent); font-size: 9px; margin-left: auto; padding-right: 2px; }
 .nav-dot.complete { background: var(--success); border-color: var(--success); }
 .nav-dot.partial { background: var(--accent); border-color: var(--accent); }
 .nav-phase-env .nav-dot.active-phase { border-color: #b794f4; }
@@ -293,21 +294,24 @@ body.fac-mode .fac-only { display: block; }
   <div class="sidebar-section">Session</div>
   <div class="nav-item" onclick="nav('setup')" id="nav-setup"><div class="nav-dot" id="dot-setup"></div> Session Setup</div>
   <div class="nav-item" onclick="nav('diagnostic')" id="nav-diagnostic"><div class="nav-dot" id="dot-diagnostic"></div> Diagnostic Framework</div>
-  <div class="nav-item" onclick="nav('guidance')" id="nav-guidance" style="border-left:3px solid var(--accent); background:rgba(244,162,97,0.1);"><div class="nav-dot" id="dot-guidance"></div> <span style="color:var(--accent); font-weight:700;">Recommended Path</span></div>
 
   <div class="phase-bar phase-macro" style="margin-top:8px;"></div>
-  <div class="sidebar-section">Macro Design</div>
+  <div class="sidebar-section">Macro Design — Core Steps</div>
   <div class="nav-item" onclick="nav('gap')" id="nav-gap"><div class="nav-dot" id="dot-gap"></div> Gap Analysis</div>
+  <div class="nav-item" onclick="nav('design-criteria')" id="nav-design-criteria"><div class="nav-dot" id="dot-design-criteria"></div> Design Criteria</div>
+  <div class="nav-item" onclick="nav('org-rationale')" id="nav-org-rationale"><div class="nav-dot" id="dot-org-rationale"></div> Organizing Rationale</div>
+  <div class="nav-item" onclick="nav('linkages')" id="nav-linkages"><div class="nav-dot" id="dot-linkages"></div> Linkages</div>
+  <div class="nav-item" onclick="nav('guidance')" id="nav-guidance" style="border-left:3px solid var(--accent); background:rgba(244,162,97,0.12);"><div class="nav-dot" id="dot-guidance"></div> <span style="color:var(--accent); font-weight:700;">&#9733; Recommended Path</span></div>
+
+  <div class="phase-bar phase-macro" style="margin-top:8px; opacity:0.5;"></div>
+  <div class="sidebar-section">Additional Macro Design</div>
   <div class="nav-item" onclick="nav('stakeholder')" id="nav-stakeholder"><div class="nav-dot" id="dot-stakeholder"></div> Stakeholder Analysis</div>
   <div class="nav-item" onclick="nav('anchor')" id="nav-anchor"><div class="nav-dot" id="dot-anchor"></div> ANCHOR / Value Offering</div>
   <div class="nav-item" onclick="nav('diff-activities')" id="nav-diff-activities"><div class="nav-dot" id="dot-diff-activities"></div> Differentiating Activities</div>
-  <div class="nav-item" onclick="nav('design-criteria')" id="nav-design-criteria"><div class="nav-dot" id="dot-design-criteria"></div> Design Criteria</div>
   <div class="nav-item" onclick="nav('culture-behaviors')" id="nav-culture-behaviors"><div class="nav-dot" id="dot-culture-behaviors"></div> Strategic Culture Behaviors</div>
   <div class="nav-item" onclick="nav('business-model')" id="nav-business-model"><div class="nav-dot" id="dot-business-model"></div> Business Model Development</div>
   <div class="nav-item" onclick="nav('work-cat')" id="nav-work-cat"><div class="nav-dot" id="dot-work-cat"></div> Work Categorization</div>
   <div class="nav-item" onclick="nav('placement')" id="nav-placement"><div class="nav-dot" id="dot-placement"></div> Placement of Work</div>
-  <div class="nav-item" onclick="nav('org-rationale')" id="nav-org-rationale"><div class="nav-dot" id="dot-org-rationale"></div> Organizing Rationale</div>
-  <div class="nav-item" onclick="nav('linkages')" id="nav-linkages"><div class="nav-dot" id="dot-linkages"></div> Linkages</div>
   <div class="nav-item" onclick="nav('raci')" id="nav-raci"><div class="nav-dot" id="dot-raci"></div> RACI Table</div>
 
   <div class="phase-bar phase-micro" style="margin-top:8px;"></div>
@@ -766,6 +770,7 @@ body.fac-mode .fac-only { display: block; }
         <h4>Facilitator Note</h4>
         Culture is how we do things here. Strategic culture behaviors are the specific observable behaviors that, if widely practiced, would support achievement of desired results. The design should reinforce these behaviors through structure, metrics, rewards, and processes.
       </div>
+      <div id="relevance-culture-behaviors" class="section-relevance" style="display:none;"></div>
       <div class="guide-box">
         <h4>Guiding Questions</h4>
         <ul>
@@ -1538,7 +1543,7 @@ body.fac-mode .fac-only { display: block; }
 // ============================================================
 // STATE
 // ============================================================
-const SECTIONS = ['setup','diagnostic','guidance','gap','stakeholder','anchor','diff-activities','design-criteria','culture-behaviors','business-model','work-cat','placement','org-rationale','linkages','raci','span-control','design-options','process-eval','org-choices','action-plan','summary'];
+const SECTIONS = ['setup','diagnostic','gap','design-criteria','org-rationale','linkages','guidance','stakeholder','anchor','diff-activities','culture-behaviors','business-model','work-cat','placement','raci','span-control','design-options','process-eval','org-choices','action-plan','summary'];
 let currentSection = 'setup';
 
 const defaultState = () => ({
@@ -2295,6 +2300,7 @@ const GUIDANCE_SECTIONS = [
   { id: 'stakeholder', label: 'Stakeholder Analysis' },
   { id: 'anchor', label: 'ANCHOR / Value Offering' },
   { id: 'diff-activities', label: 'Differentiating Activities' },
+  { id: 'culture-behaviors', label: 'Strategic Culture Behaviors' },
   { id: 'business-model', label: 'Business Model Development' },
   { id: 'work-cat', label: 'Work Categorization' },
   { id: 'placement', label: 'Placement of Work' },
@@ -2314,6 +2320,36 @@ function generateGuidance() {
   };
 
   const kwMatch = (text, keywords) => keywords.some(kw => text.toLowerCase().includes(kw));
+
+  // --- Signals from Diagnostic Framework ---
+  const diag = state.diagnostic;
+  const macroAdequate = diag.macro === 'yes';
+
+  if (diag.strategy === 'no') {
+    addScore('anchor', 2, 'Diagnostic flagged unclear strategy — ANCHOR clarifies your value proposition before structural choices can be made');
+    addScore('diff-activities', 2, 'Diagnostic flagged unclear strategy — Differentiating Activities identifies what the design must protect and enable');
+  } else if (diag.strategy === 'partial') {
+    addScore('anchor', 1, 'Diagnostic flagged partial strategy clarity — ANCHOR / Value Offering may help sharpen direction');
+    addScore('diff-activities', 1, 'Diagnostic flagged partial strategy clarity — Differentiating Activities strengthens the link between strategy and structure');
+  }
+
+  if (diag.culture === 'undermines') {
+    addScore('culture-behaviors', 2, 'Diagnostic flagged culture as a barrier to desired results — Strategic Culture Behaviors must be defined to inform and reinforce the new design');
+  } else if (diag.culture === 'neutral') {
+    addScore('culture-behaviors', 1, 'Diagnostic flagged culture as neutral — Strategic Culture Behaviors is worth reviewing to ensure the design reinforces desired ways of working');
+  }
+
+  if (diag.micro === 'no') {
+    addScore('process-eval', 2, 'Diagnostic flagged significant micro-level process and role issues — Process Evaluation is the primary tool for this');
+    addScore('org-choices', 2, 'Diagnostic flagged micro-level design issues — Aligning Org Choices addresses the five organizing systems that need alignment');
+  } else if (diag.micro === 'partial') {
+    addScore('process-eval', 1, 'Diagnostic flagged some process or role confusion — Process Evaluation helps prioritize where micro redesign is needed');
+    addScore('org-choices', 1, 'Diagnostic flagged partial micro design issues — Aligning Org Choices ensures systems are reinforcing the new structure');
+  }
+
+  if (diag.ci === 'no') {
+    addScore('org-choices', 1, 'Diagnostic flagged no continuous improvement mechanism — this is captured in Aligning Org Choices, Section 5');
+  }
 
   // --- Signals from Organizing Rationale ---
   const rationale = (state.orgRationale.primary || '').toLowerCase();
@@ -2400,6 +2436,19 @@ function generateGuidance() {
     if (kwMatch(gapText, ['model','how we work','business','value creat'])) addScore('business-model', 1, 'Gaps suggest the work system is not well understood — Business Model Development adds clarity');
   }
 
+  // Suppression: if diagnostic says macro structure is adequate, cap purely macro-structural tools at "consider"
+  const macroOnlyTools = ['stakeholder','anchor','diff-activities','business-model','work-cat','placement'];
+  if (macroAdequate) {
+    macroOnlyTools.forEach(id => {
+      if (scores[id] > 0 && reasons[id].every(r => !r.includes('Diagnostic flagged'))) {
+        scores[id] = Math.min(scores[id], 2);
+        reasons[id].push('Note: Diagnostic indicates macro structure is adequate — if using this tool, focus on validating existing design rather than full redesign');
+      } else if (scores[id] === 0) {
+        reasons[id].push('Diagnostic indicates macro structure is adequate — this tool is likely not needed for this engagement');
+      }
+    });
+  }
+
   return GUIDANCE_SECTIONS.map(s => ({
     ...s,
     score: scores[s.id],
@@ -2415,11 +2464,21 @@ function renderGuidance() {
   // Render Recommended Path section
   const container = document.getElementById('guidance-content');
   if (container) {
+    // Diagnostic warning banners
+    const diag = state.diagnostic;
+    let diagWarnings = '';
+    if (diag.systemic === 'individual') {
+      diagWarnings += `<div class="diag-callout callout-warn" style="margin-bottom:14px;"><h4>Diagnostic Alert — Individual Issue Detected</h4><p>The diagnostic indicates the issue is individual (performance or behaviour), not systemic. OD structural tools may not resolve the root cause. Consider whether HR/talent management or coaching interventions are the primary need before committing to a redesign.</p></div>`;
+    }
+    if (diag.results === 'no') {
+      diagWarnings += `<div class="diag-callout callout-warn" style="margin-bottom:14px;"><h4>Diagnostic Alert — Results Clarity Needed</h4><p>Desired results are not yet clear. Structural decisions made now may need to be revisited once there is agreement on what the organization needs to achieve. Return to Gap Analysis to sharpen result clarity first.</p></div>`;
+    }
+
     if (!hasInputs) {
-      container.innerHTML = `
+      container.innerHTML = diagWarnings + `
         <div class="guidance-empty">
-          <p style="font-size:15px; font-weight:600; color:var(--primary);">Complete the foundational sections to receive personalized recommendations.</p>
-          <p style="margin-top:8px;">Fill in any of these four sections to get started:</p>
+          <p style="font-size:15px; font-weight:600; color:var(--primary);">Complete the four core Macro Design steps to receive personalized recommendations.</p>
+          <p style="margin-top:8px;">Fill in any of these sections to get started:</p>
           <div class="guidance-steps">
             <div class="guidance-step-chip" onclick="nav('gap')">Gap Analysis</div>
             <div class="guidance-step-chip" onclick="nav('design-criteria')">Design Criteria</div>
@@ -2432,7 +2491,7 @@ function renderGuidance() {
       const consider = results.filter(r => r.level === 'consider');
       const notNeeded = results.filter(r => r.level === 'not-needed');
 
-      let html = '';
+      let html = diagWarnings;
       if (strong.length > 0) {
         html += '<h3 style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--secondary); margin-bottom:10px;">Strongly Recommended</h3>';
         html += strong.map(r => renderGuidanceCard(r)).join('');
@@ -2446,6 +2505,19 @@ function renderGuidance() {
       }
       container.innerHTML = html;
     }
+  }
+
+  // Update sidebar recommendation indicators
+  GUIDANCE_SECTIONS.forEach(s => {
+    const navEl = document.getElementById('nav-' + s.id);
+    if (!navEl) return;
+    navEl.classList.remove('nav-recommended');
+  });
+  if (hasInputs) {
+    results.filter(r => r.level === 'strong').forEach(r => {
+      const navEl = document.getElementById('nav-' + r.id);
+      if (navEl) navEl.classList.add('nav-recommended');
+    });
   }
 
   // Render inline relevance callouts on each situational section
