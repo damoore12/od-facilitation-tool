@@ -187,6 +187,35 @@ body.fac-mode .fac-only { display: block; }
 .summary-field { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--bg); font-size: 13px; }
 .summary-field .label { font-weight: 600; color: var(--text-muted); min-width: 180px; }
 
+/* Guidance engine */
+.guidance-card { border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; background: var(--card-bg); }
+.guidance-card.strong { border-left: 4px solid var(--secondary); }
+.guidance-card.consider { border-left: 4px solid var(--warning); }
+.guidance-card.not-needed { border-left: 4px solid var(--border); opacity: 0.65; }
+.guidance-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.guidance-card-header h4 { font-size: 14px; font-weight: 700; color: var(--primary); }
+.guidance-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; white-space: nowrap; }
+.badge-strong { background: #c6f6d5; color: #22543d; }
+.badge-consider { background: #fefcbf; color: #744210; }
+.badge-not-needed { background: var(--bg); color: var(--text-muted); }
+.guidance-reasons { list-style: none; padding: 0; margin: 0; }
+.guidance-reasons li { font-size: 13px; color: var(--text); padding: 3px 0 3px 18px; position: relative; }
+.guidance-reasons li::before { content: "→"; position: absolute; left: 0; color: var(--secondary); font-weight: 700; }
+.guidance-go-btn { margin-top: 10px; }
+.guidance-empty { text-align: center; padding: 32px 20px; color: var(--text-muted); font-size: 14px; }
+.guidance-empty .guidance-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; text-align: left; }
+.guidance-step-chip { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+.guidance-step-chip:hover { border-color: var(--secondary); color: var(--secondary); background: #ebf8ff; }
+.section-relevance { border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; }
+.relevance-strong { background: #ebf8ff; border-left: 4px solid var(--secondary); }
+.relevance-consider { background: #fffbeb; border-left: 4px solid var(--warning); }
+.relevance-low { background: var(--bg); border-left: 4px solid var(--border); color: var(--text-muted); }
+.relevance-strong h4 { color: var(--secondary); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.relevance-consider h4 { color: #92400e; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.relevance-low h4 { color: var(--text-muted); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.relevance-reasons { margin: 0; padding-left: 16px; }
+.relevance-reasons li { margin-bottom: 2px; }
+
 /* Design options */
 .options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 16px; }
 .option-card { border: 2px solid var(--border); border-radius: 10px; padding: 14px; }
@@ -264,6 +293,7 @@ body.fac-mode .fac-only { display: block; }
   <div class="sidebar-section">Session</div>
   <div class="nav-item" onclick="nav('setup')" id="nav-setup"><div class="nav-dot" id="dot-setup"></div> Session Setup</div>
   <div class="nav-item" onclick="nav('diagnostic')" id="nav-diagnostic"><div class="nav-dot" id="dot-diagnostic"></div> Diagnostic Framework</div>
+  <div class="nav-item" onclick="nav('guidance')" id="nav-guidance" style="border-left:3px solid var(--accent); background:rgba(244,162,97,0.1);"><div class="nav-dot" id="dot-guidance"></div> <span style="color:var(--accent); font-weight:700;">Recommended Path</span></div>
 
   <div class="phase-bar phase-macro" style="margin-top:8px;"></div>
   <div class="sidebar-section">Macro Design</div>
@@ -443,6 +473,23 @@ body.fac-mode .fac-only { display: block; }
   </div>
 </div>
 
+<!-- ============================================================ SECTION: RECOMMENDED PATH -->
+<div class="section" id="sec-guidance">
+  <div class="card">
+    <div class="card-header" style="background: linear-gradient(135deg, #744210, #c05621);">
+      <h2>Recommended Path</h2>
+      <p>Personalized guidance based on your Gap Analysis, Design Criteria, Organizing Rationale, and Linkages</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        These recommendations update automatically as you complete the four foundational sections. Use this as your session agenda — not every section needs to be completed. Focus time where the signals indicate the highest value.
+      </div>
+      <div id="guidance-content"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ============================================================ SECTION: GAP ANALYSIS -->
 <div class="section" id="sec-gap">
   <div class="card">
@@ -503,6 +550,7 @@ body.fac-mode .fac-only { display: block; }
         <h4>Facilitator Note</h4>
         Stakeholders are those who receive value FROM the organization or who the organization depends ON. Capture their specific requirements — what they need the organization to deliver. This informs design criteria.
       </div>
+      <div id="relevance-stakeholder" class="section-relevance" style="display:none;"></div>
       <div class="guide-box">
         <h4>Guiding Questions</h4>
         <ul>
@@ -547,6 +595,7 @@ body.fac-mode .fac-only { display: block; }
         <h4>Facilitator Note</h4>
         ANCHOR helps clarify the value proposition — this drives design choices. An Employee Value Offering applies the same thinking internally to attract and retain talent. Both should be explicit before structural choices are made.
       </div>
+      <div id="relevance-anchor" class="section-relevance" style="display:none;"></div>
       <div class="guide-box">
         <h4>ANCHOR Framework</h4>
         <ul>
@@ -616,6 +665,7 @@ body.fac-mode .fac-only { display: block; }
         <h4>Facilitator Note</h4>
         Differentiating activities are the handful of things the organization does that most directly create the value it uniquely provides. These are NOT everything the org does — they are what makes it distinctively valuable. Design should protect and enable these activities.
       </div>
+      <div id="relevance-diff-activities" class="section-relevance" style="display:none;"></div>
       <div class="guide-box">
         <h4>Guiding Questions</h4>
         <ul>
@@ -766,6 +816,7 @@ body.fac-mode .fac-only { display: block; }
         <h4>Facilitator Note</h4>
         The business model describes how the organization's work connects — inputs, key activities, outputs, and value delivered. Understanding this system is essential before deciding how to organize. Structure should follow the business model, not the other way around.
       </div>
+      <div id="relevance-business-model" class="section-relevance" style="display:none;"></div>
       <div class="guide-box">
         <h4>Guiding Questions</h4>
         <ul>
@@ -808,6 +859,7 @@ body.fac-mode .fac-only { display: block; }
         <h4>Facilitator Note</h4>
         This tool challenges assumptions about where time and resources go. Most organizations over-invest in Compliance and Necessary Work and under-invest in Competitive Work. The conversation about categorization is often as valuable as the output.
       </div>
+      <div id="relevance-work-cat" class="section-relevance" style="display:none;"></div>
       <div class="work-cat-legend">
         <div class="cat-badge cat-competitive">Competitive — Greatest Return</div>
         <div class="cat-badge cat-enabling">Enabling — Supports Competitive</div>
@@ -863,6 +915,7 @@ body.fac-mode .fac-only { display: block; }
         <h4>Facilitator Note</h4>
         Placement decisions directly drive structure. Work that varies significantly by context stays decentralized (close to the client). Work that is identical everywhere benefits from standardization or centralization. Challenge assumptions — many orgs have work in the wrong place.
       </div>
+      <div id="relevance-placement" class="section-relevance" style="display:none;"></div>
       <div class="placement-legend">
         <div class="place-badge place-unique">Unique / Decentralized — Context-specific</div>
         <div class="place-badge place-standard">Standardized — Same everywhere</div>
@@ -1095,6 +1148,7 @@ body.fac-mode .fac-only { display: block; }
         <h4>Facilitator Note</h4>
         RACI clarifies who does what. Each decision/activity should have exactly ONE Accountable (A). Multiple R's can work but watch for diffusion of responsibility. Too many C's and I's creates bureaucracy — be selective about who needs to be consulted vs. simply informed.
       </div>
+      <div id="relevance-raci" class="section-relevance" style="display:none;"></div>
       <div class="guide-box">
         <h4>RACI Definitions</h4>
         <ul>
@@ -1150,6 +1204,7 @@ body.fac-mode .fac-only { display: block; }
         <h4>Facilitator Note</h4>
         This bridges macro to micro design. The macro structure is set — now identify which processes within that structure are broken or misaligned and need detailed redesign. Prioritize by impact on competitive work and stakeholder value.
       </div>
+      <div id="relevance-process-eval" class="section-relevance" style="display:none;"></div>
       <div class="guide-box">
         <h4>Guiding Questions</h4>
         <ul>
@@ -1191,6 +1246,7 @@ body.fac-mode .fac-only { display: block; }
       <p>Ensure all organizational systems are aligned and mutually reinforcing</p>
     </div>
     <div class="card-body">
+      <div id="relevance-org-choices" class="section-relevance" style="display:none;"></div>
       <div class="fac-only fac-note">
         <h4>Facilitator Note</h4>
         This is the integration check. The Micro Design organizing systems must all point in the same direction. A misaligned system (e.g., structure says collaborate but rewards competition) will undermine the design. Use this to surface misalignments and plan interventions.
@@ -1241,6 +1297,7 @@ body.fac-mode .fac-only { display: block; }
       <p>Determine appropriate spans and layers based on the AlignOrg framework</p>
     </div>
     <div class="card-body">
+      <div id="relevance-span-control" class="section-relevance" style="display:none;"></div>
       <div class="fac-only fac-note">
         <h4>Facilitator Note</h4>
         Span of control is how many direct reports a manager effectively oversees. There is no universal "right" number — it depends on 8 contextual factors. Rate each factor 1 (narrow span favoured) to 5 (wide span favoured). The result is a recommended range, not a rule.
@@ -1481,7 +1538,7 @@ body.fac-mode .fac-only { display: block; }
 // ============================================================
 // STATE
 // ============================================================
-const SECTIONS = ['setup','diagnostic','gap','stakeholder','anchor','diff-activities','design-criteria','culture-behaviors','business-model','work-cat','placement','org-rationale','linkages','raci','span-control','design-options','process-eval','org-choices','action-plan','summary'];
+const SECTIONS = ['setup','diagnostic','guidance','gap','stakeholder','anchor','diff-activities','design-criteria','culture-behaviors','business-model','work-cat','placement','org-rationale','linkages','raci','span-control','design-options','process-eval','org-choices','action-plan','summary'];
 let currentSection = 'setup';
 
 const defaultState = () => ({
@@ -1552,6 +1609,7 @@ function save() {
     el.textContent = 'Saved ' + new Date().toLocaleTimeString();
     updateDots();
     updateOrgName();
+    renderGuidance();
   }, 500);
 }
 
@@ -1565,6 +1623,7 @@ function loadState() {
   updateOrgName();
   renderAllTables();
   renderRaci();
+  renderGuidance();
 }
 
 function collectFormState() {
@@ -1743,6 +1802,7 @@ function applyStateToForm() {
   renderDesignOptions();
   renderDecisionsTable();
   renderActionsTable();
+  renderGuidance();
 }
 
 function updateOrgName() {
@@ -1754,6 +1814,7 @@ function updateDots() {
   const checks = {
     setup: () => state.meta.orgName || state.meta.objectives,
     diagnostic: () => state.diagnostic.results,
+    guidance: () => false,
     gap: () => state.gap.rows.length > 0,
     stakeholder: () => state.stakeholder.rows.length > 0,
     anchor: () => state.anchor.audience || state.anchor.need,
@@ -2225,6 +2286,204 @@ function esc(str) {
 
 function yesNo(val) {
   return ['Yes','No','Partial'].map(o => `<option ${val===o?'selected':''}>${o}</option>`).join('');
+}
+
+// ============================================================
+// GUIDANCE ENGINE
+// ============================================================
+const GUIDANCE_SECTIONS = [
+  { id: 'stakeholder', label: 'Stakeholder Analysis' },
+  { id: 'anchor', label: 'ANCHOR / Value Offering' },
+  { id: 'diff-activities', label: 'Differentiating Activities' },
+  { id: 'business-model', label: 'Business Model Development' },
+  { id: 'work-cat', label: 'Work Categorization' },
+  { id: 'placement', label: 'Placement of Work' },
+  { id: 'raci', label: 'RACI Table' },
+  { id: 'span-control', label: 'Span of Control' },
+  { id: 'process-eval', label: 'Process Evaluation' },
+  { id: 'org-choices', label: 'Aligning Organizing Choices' }
+];
+
+function generateGuidance() {
+  const scores = {};
+  const reasons = {};
+  GUIDANCE_SECTIONS.forEach(s => { scores[s.id] = 0; reasons[s.id] = []; });
+
+  const addScore = (id, pts, reason) => {
+    if (scores[id] !== undefined) { scores[id] += pts; if (reason) reasons[id].push(reason); }
+  };
+
+  const kwMatch = (text, keywords) => keywords.some(kw => text.toLowerCase().includes(kw));
+
+  // --- Signals from Organizing Rationale ---
+  const rationale = (state.orgRationale.primary || '').toLowerCase();
+  if (rationale.includes('function')) {
+    addScore('raci', 2, 'Functional structures create accountability gaps across silos — RACI clarifies who owns what');
+    addScore('design-options', 1, 'Functional structure benefits from comparing design options before converging');
+  }
+  if (rationale.includes('customer') || rationale.includes('client')) {
+    addScore('stakeholder', 2, 'Customer/Client rationale requires deep stakeholder requirements analysis');
+    addScore('anchor', 1, 'Client-organized structures benefit from a clear ANCHOR value offering per segment');
+  }
+  if (rationale.includes('product') || rationale.includes('service')) {
+    addScore('work-cat', 1, 'Product/Service rationale: categorizing work by strategic value prevents duplication');
+    addScore('design-options', 1, 'Product/Service structure benefits from comparing options before converging');
+  }
+  if (rationale.includes('process')) {
+    addScore('raci', 2, 'Process-based structures require clear RACI — end-to-end accountability is the core risk');
+    addScore('process-eval', 2, 'Process rationale means process quality is central — evaluate which processes need redesign');
+  }
+  if (rationale.includes('geography')) {
+    addScore('placement', 2, 'Geographic rationale requires deliberate placement decisions — what stays local vs. central?');
+    addScore('work-cat', 1, 'Geographic structure: Work Categorization helps decide what is worth duplicating across regions');
+  }
+  if (rationale.includes('shared') || rationale.includes('centralized')) {
+    addScore('placement', 2, 'Shared/Centralized structure makes placement decisions critical — what moves to the centre?');
+    addScore('stakeholder', 1, 'Centralized structures risk distance from clients — Stakeholder Analysis keeps client requirements visible');
+  }
+  if (rationale.includes('dedicated') || rationale.includes('decentralized')) {
+    addScore('work-cat', 2, 'Dedicated/Decentralized structure risks duplication — Work Categorization identifies what should not be duplicated');
+    addScore('placement', 1, 'Decentralized placement decisions need explicit rationale for what stays embedded vs. shared');
+  }
+  if (rationale.includes('virtual') || rationale.includes('network')) {
+    addScore('raci', 2, 'Virtual/Network structures have the highest accountability risk — RACI is essential');
+    addScore('span-control', 1, 'Virtual structures often have different span implications — Span of Control analysis is relevant');
+  }
+  if (rationale.includes('matrix')) {
+    addScore('raci', 3, 'Matrix is the highest-complexity structure — RACI is critical to prevent dual-authority confusion');
+    addScore('span-control', 1, 'Matrix structures require careful span analysis — managers often carry higher coordination loads');
+  }
+
+  // --- Signals from Linkages ---
+  const lk = state.linkages.selected || {};
+  if (lk.matrix) addScore('raci', 3, 'Matrix linkage selected — RACI is essential to resolve dual-authority decision rights');
+  if (lk['process-teams']) addScore('process-eval', 2, 'Process Management Teams selected — Process Evaluation identifies which processes need dedicated teams');
+  if (lk.tech) addScore('business-model', 1, 'Technology linkage selected — Business Model helps map where technology fits in the work system');
+  if (lk.hierarchy && !lk.matrix && !lk.councils && !lk['process-teams'] && !lk.communities) {
+    addScore('raci', 1, 'Hierarchy is the primary linkage mechanism — RACI clarifies the escalation paths');
+  }
+  const highCostCount = ['matrix','councils','process-teams'].filter(k => lk[k]).length;
+  if (highCostCount >= 2) addScore('design-options', 1, 'Multiple high-cost linkage mechanisms suggest structural complexity — Design Options comparison is valuable');
+
+  // --- Signals from Design Criteria ---
+  const criteriaText = (state.criteria.rows.map(r => r.criterion).join(' ') + ' ' + (state.criteria.nonneg || '')).toLowerCase();
+  if (criteriaText.length > 5) {
+    if (kwMatch(criteriaText, ['effic','cost','resource','budget','saving'])) addScore('work-cat', 2, 'Design criteria reference efficiency/cost — Work Categorization directly addresses resource allocation');
+    if (kwMatch(criteriaText, ['accountab','decision','approv','owner'])) addScore('raci', 2, 'Design criteria reference accountability or decision-making — RACI is the primary tool for this');
+    if (kwMatch(criteriaText, ['client','stakeholder','customer','citizen','user'])) {
+      addScore('stakeholder', 2, 'Design criteria reference clients/stakeholders — Stakeholder Analysis ensures their requirements drive design');
+      addScore('anchor', 1, 'Design criteria reference clients — ANCHOR clarifies value proposition per client segment');
+    }
+    if (kwMatch(criteriaText, ['strateg','value','differentiat','compet'])) {
+      addScore('anchor', 2, 'Design criteria reference strategy/value — ANCHOR ensures the structure serves the value proposition');
+      addScore('diff-activities', 1, 'Design criteria reference differentiation — Differentiating Activities identifies what the design must protect');
+    }
+    if (kwMatch(criteriaText, ['process','workflow','handoff','end-to-end','seamless'])) addScore('process-eval', 2, 'Design criteria reference process or workflow — Process Evaluation is a priority');
+    if (kwMatch(criteriaText, ['capabilit','skill','talent','expertise','learn'])) addScore('org-choices', 1, 'Design criteria reference capability — Aligning Org Choices covers People & Rewards alignment');
+    if (kwMatch(criteriaText, ['scale','central','consolidat','shared service'])) addScore('placement', 2, 'Design criteria reference scale/centralization — Placement of Work decisions need explicit analysis');
+    if (kwMatch(criteriaText, ['span','layer','manager','hierarch','flat'])) addScore('span-control', 2, 'Design criteria reference spans or layers — Span of Control analysis directly addresses this');
+  }
+
+  // --- Signals from Gap Analysis ---
+  const gapText = (state.gap.rows.map(r => r.gap + ' ' + r.desiredResults).join(' ') + ' ' + (state.gap.keyQuestions || '')).toLowerCase();
+  if (gapText.length > 5) {
+    if (kwMatch(gapText, ['resource','invest','effort','priorit','bandwidth','capaci'])) addScore('work-cat', 2, 'Gaps reference resource or effort — Work Categorization will surface misallocated effort');
+    if (kwMatch(gapText, ['accountab','unclear who','who owns','decision','approv'])) addScore('raci', 2, 'Gaps reference accountability or decision clarity — RACI directly addresses this');
+    if (kwMatch(gapText, ['process','slow','handoff','bottleneck','delay','workflow'])) addScore('process-eval', 2, 'Gaps reference process issues or bottlenecks — Process Evaluation is high priority');
+    if (kwMatch(gapText, ['capabilit','skill','right people','talent','expertise'])) addScore('org-choices', 1, 'Gaps reference capability — Aligning Org Choices (People & Rewards) is relevant');
+    if (kwMatch(gapText, ['strateg','direction','unclear what','priorit','focus'])) {
+      addScore('anchor', 1, 'Gaps suggest strategic direction is unclear — ANCHOR / Value Offering addresses this');
+      addScore('diff-activities', 1, 'Gaps suggest uncertainty about what is strategic — Differentiating Activities clarifies this');
+    }
+    if (state.gap.rows.length >= 3) addScore('stakeholder', 1, 'Multiple stakeholder gaps identified — Stakeholder Analysis ensures all requirements are captured');
+    if (kwMatch(gapText, ['central','decentrali','consolidat','local','region'])) addScore('placement', 1, 'Gaps reference centralization/location of work — Placement of Work is relevant');
+    if (kwMatch(gapText, ['model','how we work','business','value creat'])) addScore('business-model', 1, 'Gaps suggest the work system is not well understood — Business Model Development adds clarity');
+  }
+
+  return GUIDANCE_SECTIONS.map(s => ({
+    ...s,
+    score: scores[s.id],
+    reasons: reasons[s.id],
+    level: scores[s.id] >= 3 ? 'strong' : scores[s.id] >= 1 ? 'consider' : 'not-needed'
+  })).sort((a, b) => b.score - a.score);
+}
+
+function renderGuidance() {
+  const results = generateGuidance();
+  const hasInputs = state.gap.rows.length > 0 || state.criteria.rows.length > 0 || state.orgRationale.primary || Object.values(state.linkages.selected).some(v => v);
+
+  // Render Recommended Path section
+  const container = document.getElementById('guidance-content');
+  if (container) {
+    if (!hasInputs) {
+      container.innerHTML = `
+        <div class="guidance-empty">
+          <p style="font-size:15px; font-weight:600; color:var(--primary);">Complete the foundational sections to receive personalized recommendations.</p>
+          <p style="margin-top:8px;">Fill in any of these four sections to get started:</p>
+          <div class="guidance-steps">
+            <div class="guidance-step-chip" onclick="nav('gap')">Gap Analysis</div>
+            <div class="guidance-step-chip" onclick="nav('design-criteria')">Design Criteria</div>
+            <div class="guidance-step-chip" onclick="nav('org-rationale')">Organizing Rationale</div>
+            <div class="guidance-step-chip" onclick="nav('linkages')">Linkages</div>
+          </div>
+        </div>`;
+    } else {
+      const strong = results.filter(r => r.level === 'strong');
+      const consider = results.filter(r => r.level === 'consider');
+      const notNeeded = results.filter(r => r.level === 'not-needed');
+
+      let html = '';
+      if (strong.length > 0) {
+        html += '<h3 style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--secondary); margin-bottom:10px;">Strongly Recommended</h3>';
+        html += strong.map(r => renderGuidanceCard(r)).join('');
+      }
+      if (consider.length > 0) {
+        html += '<h3 style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--warning); margin:16px 0 10px;">Worth Considering</h3>';
+        html += consider.map(r => renderGuidanceCard(r)).join('');
+      }
+      if (notNeeded.length > 0) {
+        html += `<details style="margin-top:16px;"><summary style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); cursor:pointer;">Likely Not Needed (${notNeeded.length})</summary><div style="margin-top:10px;">` + notNeeded.map(r => renderGuidanceCard(r)).join('') + '</div></details>';
+      }
+      container.innerHTML = html;
+    }
+  }
+
+  // Render inline relevance callouts on each situational section
+  results.forEach(r => {
+    const el = document.getElementById('relevance-' + r.id);
+    if (!el) return;
+    if (!hasInputs || r.reasons.length === 0) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    if (r.level === 'strong') {
+      el.className = 'section-relevance relevance-strong';
+      el.innerHTML = `<h4>Recommended for this engagement</h4><ul class="relevance-reasons">${r.reasons.map(reason => `<li>${reason}</li>`).join('')}</ul>`;
+    } else if (r.level === 'consider') {
+      el.className = 'section-relevance relevance-consider';
+      el.innerHTML = `<h4>Worth considering for this engagement</h4><ul class="relevance-reasons">${r.reasons.map(reason => `<li>${reason}</li>`).join('')}</ul>`;
+    } else {
+      el.className = 'section-relevance relevance-low';
+      el.innerHTML = `<h4>Low priority based on your inputs</h4><p style="margin:0; font-size:13px;">No strong signals from Gap Analysis, Design Criteria, Organizing Rationale, or Linkages suggest this section is needed for this engagement.</p>`;
+    }
+  });
+}
+
+function renderGuidanceCard(r) {
+  const badgeClass = r.level === 'strong' ? 'badge-strong' : r.level === 'consider' ? 'badge-consider' : 'badge-not-needed';
+  const badgeLabel = r.level === 'strong' ? 'Strongly Recommended' : r.level === 'consider' ? 'Worth Considering' : 'Likely Not Needed';
+  const reasonsHtml = r.reasons.length > 0
+    ? `<ul class="guidance-reasons">${r.reasons.map(reason => `<li>${reason}</li>`).join('')}</ul>`
+    : `<p style="font-size:13px; color:var(--text-muted);">No specific signals detected from the four foundational sections.</p>`;
+  return `
+    <div class="guidance-card ${r.level}">
+      <div class="guidance-card-header">
+        <h4>${r.label}</h4>
+        <span class="guidance-badge ${badgeClass}">${badgeLabel}</span>
+      </div>
+      ${reasonsHtml}
+      <div class="guidance-go-btn">
+        <button class="btn btn-outline btn-sm" onclick="nav('${r.id}')">Go to ${r.label} →</button>
+      </div>
+    </div>`;
 }
 
 // ============================================================
