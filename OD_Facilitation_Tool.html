@@ -187,6 +187,42 @@ body.fac-mode .fac-only { display: block; }
 .summary-field { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--bg); font-size: 13px; }
 .summary-field .label { font-weight: 600; color: var(--text-muted); min-width: 180px; }
 
+/* Design options */
+.options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 16px; }
+.option-card { border: 2px solid var(--border); border-radius: 10px; padding: 14px; }
+.option-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--primary); }
+.option-score { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12px; }
+.score-bar-wrap { flex: 1; background: var(--bg); border-radius: 4px; height: 8px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.score-high { background: var(--success); }
+.score-mid { background: var(--warning); }
+.score-low { background: var(--danger); }
+.winner-badge { display: inline-block; background: #c6f6d5; color: #22543d; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+
+/* Span of control */
+.soc-factor { border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+.soc-factor h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.soc-slider-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.soc-slider-row input[type=range] { flex: 1; accent-color: var(--secondary); }
+.soc-label { font-size: 11px; color: var(--text-muted); min-width: 90px; text-align: right; }
+.soc-recommendation { margin-top: 16px; padding: 14px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; }
+.soc-wide { background: #f0fff4; border: 2px solid var(--success); color: #22543d; }
+.soc-narrow { background: #fff5f5; border: 2px solid var(--danger); color: #742a2a; }
+.soc-medium { background: #fffbeb; border: 2px solid var(--warning); color: #744210; }
+
+/* Action plan */
+.action-row-status-open { color: var(--warning); font-weight: 700; }
+.action-row-status-done { color: var(--success); font-weight: 700; }
+
+/* Diagnostic callout */
+.diag-callout { border-radius: 8px; padding: 14px 16px; margin-top: 16px; }
+.diag-callout h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.diag-callout ul { padding-left: 16px; font-size: 13px; }
+.diag-callout li { margin-bottom: 4px; }
+.callout-warn { background: #fffbeb; border: 1px solid #f6e05e; color: #744210; }
+.callout-info { background: #ebf8ff; border: 1px solid #bee3f8; color: #2a4a7f; }
+.callout-good { background: #f0fff4; border: 1px solid #9ae6b4; color: #22543d; }
+
 /* Print */
 @media print {
   #top-bar, #sidebar, #bottom-bar, .btn, .btn-group, #fac-toggle { display: none !important; }
@@ -246,10 +282,13 @@ body.fac-mode .fac-only { display: block; }
 
   <div class="phase-bar phase-micro" style="margin-top:8px;"></div>
   <div class="sidebar-section">Micro Design</div>
+  <div class="nav-item" onclick="nav('span-control')" id="nav-span-control"><div class="nav-dot" id="dot-span-control"></div> Span of Control</div>
+  <div class="nav-item" onclick="nav('design-options')" id="nav-design-options"><div class="nav-dot" id="dot-design-options"></div> Design Options</div>
   <div class="nav-item" onclick="nav('process-eval')" id="nav-process-eval"><div class="nav-dot" id="dot-process-eval"></div> Process Evaluation</div>
   <div class="nav-item" onclick="nav('org-choices')" id="nav-org-choices"><div class="nav-dot" id="dot-org-choices"></div> Aligning Org Choices</div>
 
   <div class="sidebar-section" style="margin-top:8px;">Output</div>
+  <div class="nav-item" onclick="nav('action-plan')" id="nav-action-plan"><div class="nav-dot" id="dot-action-plan"></div> Action Plan</div>
   <div class="nav-item" onclick="nav('summary')" id="nav-summary"><div class="nav-dot" id="dot-summary"></div> Session Summary</div>
 </nav>
 
@@ -395,6 +434,7 @@ body.fac-mode .fac-only { display: block; }
         </div>
       </div>
 
+      <div id="diag-callout-box" style="margin-top:16px;"></div>
       <div class="form-col" style="margin-top:16px;">
         <label>Diagnostic Summary Notes</label>
         <textarea id="diag-notes" rows="3" placeholder="Key observations from the diagnostic discussion..." oninput="save()"></textarea>
@@ -1193,6 +1233,220 @@ body.fac-mode .fac-only { display: block; }
   </div>
 </div>
 
+<!-- ============================================================ SECTION: SPAN OF CONTROL -->
+<div class="section" id="sec-span-control">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Span of Control Analysis</h2>
+      <p>Determine appropriate spans and layers based on the AlignOrg framework</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Span of control is how many direct reports a manager effectively oversees. There is no universal "right" number — it depends on 8 contextual factors. Rate each factor 1 (narrow span favoured) to 5 (wide span favoured). The result is a recommended range, not a rule.
+      </div>
+      <div class="guide-box">
+        <h4>How to Use</h4>
+        <ul>
+          <li>Rate each factor from 1 (favours a narrow span — 3-5 reports) to 5 (favours a wide span — 8-12+ reports)</li>
+          <li>The composite score generates a recommended span range</li>
+          <li>Use the notes to document decisions and exceptions</li>
+        </ul>
+      </div>
+
+      <div class="soc-factor">
+        <h4>1. Strategy &amp; Management Philosophy</h4>
+        <div style="font-size:12px; color:var(--text-muted);">1 = Centralized control, close oversight required &nbsp;|&nbsp; 5 = Empowerment, autonomy valued</div>
+        <div class="soc-slider-row">
+          <span class="soc-label">Narrow</span>
+          <input type="range" min="1" max="5" step="1" id="soc-strategy" value="3" oninput="updateSoc()">
+          <span class="soc-label" style="text-align:left;">Wide</span>
+          <span id="soc-strategy-val" style="font-weight:700; min-width:20px;">3</span>
+        </div>
+      </div>
+      <div class="soc-factor">
+        <h4>2. Management Capability</h4>
+        <div style="font-size:12px; color:var(--text-muted);">1 = Managers are new or developing &nbsp;|&nbsp; 5 = Highly experienced, strong coaches</div>
+        <div class="soc-slider-row">
+          <span class="soc-label">Narrow</span>
+          <input type="range" min="1" max="5" step="1" id="soc-mgrcap" value="3" oninput="updateSoc()">
+          <span class="soc-label" style="text-align:left;">Wide</span>
+          <span id="soc-mgrcap-val" style="font-weight:700; min-width:20px;">3</span>
+        </div>
+      </div>
+      <div class="soc-factor">
+        <h4>3. Nature of Work</h4>
+        <div style="font-size:12px; color:var(--text-muted);">1 = Complex, ambiguous, interdependent work &nbsp;|&nbsp; 5 = Routine, well-defined, independent work</div>
+        <div class="soc-slider-row">
+          <span class="soc-label">Narrow</span>
+          <input type="range" min="1" max="5" step="1" id="soc-work" value="3" oninput="updateSoc()">
+          <span class="soc-label" style="text-align:left;">Wide</span>
+          <span id="soc-work-val" style="font-weight:700; min-width:20px;">3</span>
+        </div>
+      </div>
+      <div class="soc-factor">
+        <h4>4. Employee Characteristics</h4>
+        <div style="font-size:12px; color:var(--text-muted);">1 = New, developing, or need close support &nbsp;|&nbsp; 5 = Highly experienced, self-directed professionals</div>
+        <div class="soc-slider-row">
+          <span class="soc-label">Narrow</span>
+          <input type="range" min="1" max="5" step="1" id="soc-empcap" value="3" oninput="updateSoc()">
+          <span class="soc-label" style="text-align:left;">Wide</span>
+          <span id="soc-empcap-val" style="font-weight:700; min-width:20px;">3</span>
+        </div>
+      </div>
+      <div class="soc-factor">
+        <h4>5. Dependency &amp; Interdependence</h4>
+        <div style="font-size:12px; color:var(--text-muted);">1 = High interdependence — constant coordination across roles &nbsp;|&nbsp; 5 = Roles are largely independent</div>
+        <div class="soc-slider-row">
+          <span class="soc-label">Narrow</span>
+          <input type="range" min="1" max="5" step="1" id="soc-depend" value="3" oninput="updateSoc()">
+          <span class="soc-label" style="text-align:left;">Wide</span>
+          <span id="soc-depend-val" style="font-weight:700; min-width:20px;">3</span>
+        </div>
+      </div>
+      <div class="soc-factor">
+        <h4>6. Alignment of Goals</h4>
+        <div style="font-size:12px; color:var(--text-muted);">1 = Goal misalignment — manager must actively align team &nbsp;|&nbsp; 5 = Strong shared purpose, self-aligning</div>
+        <div class="soc-slider-row">
+          <span class="soc-label">Narrow</span>
+          <input type="range" min="1" max="5" step="1" id="soc-goals" value="3" oninput="updateSoc()">
+          <span class="soc-label" style="text-align:left;">Wide</span>
+          <span id="soc-goals-val" style="font-weight:700; min-width:20px;">3</span>
+        </div>
+      </div>
+      <div class="soc-factor">
+        <h4>7. Supporting Technologies</h4>
+        <div style="font-size:12px; color:var(--text-muted);">1 = Limited tools — high manual oversight needed &nbsp;|&nbsp; 5 = Strong systems reduce coordination burden</div>
+        <div class="soc-slider-row">
+          <span class="soc-label">Narrow</span>
+          <input type="range" min="1" max="5" step="1" id="soc-tech" value="3" oninput="updateSoc()">
+          <span class="soc-label" style="text-align:left;">Wide</span>
+          <span id="soc-tech-val" style="font-weight:700; min-width:20px;">3</span>
+        </div>
+      </div>
+      <div class="soc-factor">
+        <h4>8. Physical Location</h4>
+        <div style="font-size:12px; color:var(--text-muted);">1 = Dispersed / remote — coordination is harder &nbsp;|&nbsp; 5 = Co-located — easy to manage and connect</div>
+        <div class="soc-slider-row">
+          <span class="soc-label">Narrow</span>
+          <input type="range" min="1" max="5" step="1" id="soc-location" value="3" oninput="updateSoc()">
+          <span class="soc-label" style="text-align:left;">Wide</span>
+          <span id="soc-location-val" style="font-weight:700; min-width:20px;">3</span>
+        </div>
+      </div>
+
+      <div id="soc-recommendation" class="soc-recommendation soc-medium">Composite score: 3.0 — Moderate span recommended (5–7 direct reports)</div>
+
+      <div class="form-col" style="margin-top:16px;">
+        <label>Notes &amp; Layer Implications</label>
+        <textarea id="soc-notes" rows="4" placeholder="Recommended span range, rationale, how this affects number of layers, exceptions by role type..." oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: DESIGN OPTIONS -->
+<div class="section" id="sec-design-options">
+  <div class="card">
+    <div class="card-header macro">
+      <h2>Design Options Comparison</h2>
+      <p>Define structural options and evaluate them against your design criteria</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Generate 2-3 distinct structural options before converging. Groups that jump to one option skip creative exploration and miss better solutions. Each option should be a genuinely different organizing approach — not just minor variations of the same idea.
+      </div>
+      <div class="guide-box">
+        <h4>How to Use</h4>
+        <ul>
+          <li>Name each option and describe its core organizing logic</li>
+          <li>Score it 1–5 against each design criterion (1 = fails, 5 = excels)</li>
+          <li>Add qualitative notes on key trade-offs</li>
+          <li>The highest-scoring option against criteria is the recommended choice</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="addDesignOption()">+ Add Design Option</button>
+          <button class="btn btn-outline btn-sm" onclick="renderDesignOptions()">Refresh Scores</button>
+        </div>
+      </div>
+      <div id="design-options-container"></div>
+
+      <div class="form-col" style="margin-top:16px;">
+        <label>Recommended Option &amp; Rationale</label>
+        <textarea id="design-options-recommendation" rows="3" placeholder="Which option best meets the design criteria and why? What trade-offs are being accepted?" oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: ACTION PLAN -->
+<div class="section" id="sec-action-plan">
+  <div class="card">
+    <div class="card-header">
+      <h2>Action Plan &amp; Decision Register</h2>
+      <p>Capture decisions made and actions required before leaving the session</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        End every session with a complete Action Plan. Each action needs an Owner and a Due Date — "team will look into it" is not an action. Capture Key Decisions separately — these are the agreements made that should not be re-litigated at the next meeting.
+      </div>
+
+      <h3 style="font-size:15px; font-weight:700; margin-bottom:10px; color:var(--primary);">Key Decisions Made</h3>
+      <div class="guide-box" style="margin-bottom:12px;">
+        <h4>What to capture here</h4>
+        <ul>
+          <li>Structural decisions (e.g., "We will organize by client segment, not by function")</li>
+          <li>Scope decisions (what is and is not in scope for redesign)</li>
+          <li>Design principle decisions (e.g., "Work will be centralized for efficiency")</li>
+        </ul>
+      </div>
+      <div class="table-wrapper">
+        <table id="decisions-table">
+          <thead>
+            <tr>
+              <th>Decision Made</th>
+              <th>Rationale / Context</th>
+              <th>Made By</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="decisions-body"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="addRow('decisions')">+ Add Decision</button>
+
+      <hr style="border:none; border-top:1px solid var(--border); margin:24px 0;">
+
+      <h3 style="font-size:15px; font-weight:700; margin-bottom:10px; color:var(--primary);">Action Items</h3>
+      <div class="table-wrapper">
+        <table id="actions-table">
+          <thead>
+            <tr>
+              <th>Action Item</th>
+              <th>Owner</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="actions-body"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="addRow('actions')">+ Add Action</button>
+
+      <div class="form-col" style="margin-top:20px;">
+        <label>Next Session / Follow-up Plan</label>
+        <textarea id="action-followup" rows="3" placeholder="When is the next session? What must be completed before then? Who needs to be involved?" oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ============================================================ SECTION: SUMMARY -->
 <div class="section" id="sec-summary">
   <div class="card">
@@ -1227,7 +1481,7 @@ body.fac-mode .fac-only { display: block; }
 // ============================================================
 // STATE
 // ============================================================
-const SECTIONS = ['setup','diagnostic','gap','stakeholder','anchor','diff-activities','design-criteria','culture-behaviors','business-model','work-cat','placement','org-rationale','linkages','raci','process-eval','org-choices','summary'];
+const SECTIONS = ['setup','diagnostic','gap','stakeholder','anchor','diff-activities','design-criteria','culture-behaviors','business-model','work-cat','placement','org-rationale','linkages','raci','span-control','design-options','process-eval','org-choices','action-plan','summary'];
 let currentSection = 'setup';
 
 const defaultState = () => ({
@@ -1246,7 +1500,11 @@ const defaultState = () => ({
   linkages: { selected:{}, notes:'' },
   raci: { roles:[], decisions:[], matrix:{}, assumptions:'' },
   process: { rows:[], notes:'' },
-  choices: { work:'', structure:'', information:'', people:'', ci:'', misalignments:'' }
+  choices: { work:'', structure:'', information:'', people:'', ci:'', misalignments:'' },
+  soc: { strategy:3, mgrcap:3, work:3, empcap:3, depend:3, goals:3, tech:3, location:3, notes:'' },
+  designOptions: { options:[], recommendation:'' },
+  decisions: { rows:[], followup:'' },
+  actions: { rows:[] }
 });
 
 let state = defaultState();
@@ -1386,6 +1644,19 @@ function collectFormState() {
   // stakeholder
   const stnotes = document.getElementById('stakeholder-notes');
   if (stnotes) state.stakeholder.notes = stnotes.value;
+  // soc
+  ['strategy','mgrcap','work','empcap','depend','goals','tech','location'].forEach(k => {
+    const el = document.getElementById('soc-' + k);
+    if (el) state.soc[k] = parseInt(el.value) || 3;
+  });
+  const socNotes = document.getElementById('soc-notes');
+  if (socNotes) state.soc.notes = socNotes.value;
+  // design options
+  const doRec = document.getElementById('design-options-recommendation');
+  if (doRec) state.designOptions.recommendation = doRec.value;
+  // decisions / actions
+  const afollowup = document.getElementById('action-followup');
+  if (afollowup) state.decisions.followup = afollowup.value;
 }
 
 function applyStateToForm() {
@@ -1457,6 +1728,21 @@ function applyStateToForm() {
   if (gkq) gkq.value = state.gap.keyQuestions || '';
   const stnotes = document.getElementById('stakeholder-notes');
   if (stnotes) stnotes.value = state.stakeholder.notes || '';
+  // soc
+  ['strategy','mgrcap','work','empcap','depend','goals','tech','location'].forEach(k => {
+    const el = document.getElementById('soc-' + k);
+    if (el) { el.value = state.soc[k] || 3; document.getElementById('soc-' + k + '-val').textContent = state.soc[k] || 3; }
+  });
+  const socNotes = document.getElementById('soc-notes');
+  if (socNotes) socNotes.value = state.soc.notes || '';
+  const doRec = document.getElementById('design-options-recommendation');
+  if (doRec) doRec.value = state.designOptions.recommendation || '';
+  const afollowup = document.getElementById('action-followup');
+  if (afollowup) afollowup.value = state.decisions.followup || '';
+  updateSoc();
+  renderDesignOptions();
+  renderDecisionsTable();
+  renderActionsTable();
 }
 
 function updateOrgName() {
@@ -1482,6 +1768,9 @@ function updateDots() {
     raci: () => state.raci.decisions.length > 0,
     'process-eval': () => state.process.rows.length > 0,
     'org-choices': () => state.choices.work || state.choices.structure,
+    'span-control': () => state.soc.notes,
+    'design-options': () => state.designOptions.options.length > 0,
+    'action-plan': () => state.actions.rows.length > 0 || state.decisions.rows.length > 0,
     summary: () => false
   };
   SECTIONS.forEach(s => {
@@ -1522,12 +1811,18 @@ function addRow(type) {
     case 'process':
       state.process.rows.push({id, process:'', assessment:'', priority:'Medium', timing:'Now', action:''});
       renderProcessTable(); break;
+    case 'decisions':
+      state.decisions.rows.push({id, decision:'', rationale:'', madeBy:''});
+      renderDecisionsTable(); break;
+    case 'actions':
+      state.actions.rows.push({id, action:'', owner:'', dueDate:'', status:'Open'});
+      renderActionsTable(); break;
   }
   save();
 }
 
 function removeRow(type, id) {
-  const map = { gap:'gap', stakeholder:'stakeholder', diff:'diff', criteria:'criteria', culture:'culture', workcat:'workcat', placement:'placement', process:'process' };
+  const map = { gap:'gap', stakeholder:'stakeholder', diff:'diff', criteria:'criteria', culture:'culture', workcat:'workcat', placement:'placement', process:'process', decisions:'decisions', actions:'actions' };
   const key = map[type];
   if (key) { state[key].rows = state[key].rows.filter(r => r.id !== id); }
   renderAllTables();
@@ -1543,6 +1838,8 @@ function renderAllTables() {
   renderWorkcatTable();
   renderPlacementTable();
   renderProcessTable();
+  renderDecisionsTable();
+  renderActionsTable();
 }
 
 function renderGapTable() {
@@ -1766,7 +2063,7 @@ function toggleFacMode() {
 // ============================================================
 // DIAGNOSTIC
 // ============================================================
-function saveDiag() { save(); }
+function saveDiag() { save(); renderDiagCallout(); }
 
 // ============================================================
 // SUMMARY
@@ -1855,6 +2152,13 @@ function renderSummary() {
       ${field('5. Continuous Improvement', state.choices.ci)}
       ${field('Misalignments', state.choices.misalignments)}
     </div>
+    <div class="summary-section">
+      <h3>Span of Control</h3>
+      ${field('Notes & Decisions', state.soc.notes)}
+    </div>
+    ${state.designOptions.options.length > 0 ? `<div class="summary-section"><h3>Design Options</h3>${state.designOptions.options.map(o => `<div class="summary-field"><span class="label">${esc(o.name)}</span><span>${esc(o.description)}</span></div>`).join('')}${field('Recommended Option', state.designOptions.recommendation)}</div>` : ''}
+    ${state.decisions.rows.length > 0 ? `<div class="summary-section"><h3>Key Decisions</h3>${state.decisions.rows.map(r => `<div class="summary-field"><span class="label">${esc(r.madeBy)||'—'}</span><span>${esc(r.decision)}</span></div>`).join('')}</div>` : ''}
+    ${state.actions.rows.length > 0 ? `<div class="summary-section"><h3>Action Items</h3><div class="table-wrapper"><table><thead><tr><th>Action</th><th>Owner</th><th>Due Date</th><th>Status</th></tr></thead><tbody>${state.actions.rows.map(r => `<tr><td>${esc(r.action)}</td><td>${esc(r.owner)}</td><td>${esc(r.dueDate)}</td><td>${esc(r.status)}</td></tr>`).join('')}</tbody></table></div>${field('Follow-up Plan', state.decisions.followup)}</div>` : ''}
   `;
 }
 
@@ -1924,10 +2228,219 @@ function yesNo(val) {
 }
 
 // ============================================================
+// SPAN OF CONTROL
+// ============================================================
+const SOC_FACTORS = ['strategy','mgrcap','work','empcap','depend','goals','tech','location'];
+function updateSoc() {
+  let total = 0;
+  SOC_FACTORS.forEach(k => {
+    const el = document.getElementById('soc-' + k);
+    const val = el ? parseInt(el.value) || 3 : 3;
+    const display = document.getElementById('soc-' + k + '-val');
+    if (display) display.textContent = val;
+    total += val;
+    if (el) state.soc[k] = val;
+  });
+  const avg = total / SOC_FACTORS.length;
+  const rec = document.getElementById('soc-recommendation');
+  if (!rec) return;
+  if (avg <= 2) {
+    rec.className = 'soc-recommendation soc-narrow';
+    rec.textContent = `Composite score: ${avg.toFixed(1)} — Narrow span recommended (3–5 direct reports)`;
+  } else if (avg <= 3.5) {
+    rec.className = 'soc-recommendation soc-medium';
+    rec.textContent = `Composite score: ${avg.toFixed(1)} — Moderate span recommended (5–7 direct reports)`;
+  } else {
+    rec.className = 'soc-recommendation soc-wide';
+    rec.textContent = `Composite score: ${avg.toFixed(1)} — Wide span recommended (7–12+ direct reports)`;
+  }
+  save();
+}
+
+// ============================================================
+// DESIGN OPTIONS
+// ============================================================
+function addDesignOption() {
+  const id = Date.now();
+  const criteria = state.criteria.rows.map(r => r.criterion).filter(Boolean);
+  const scores = {};
+  criteria.forEach(c => { scores[c] = 3; });
+  state.designOptions.options.push({ id, name: 'Option ' + (state.designOptions.options.length + 1), description: '', pros: '', cons: '', scores });
+  renderDesignOptions();
+  save();
+}
+
+function removeDesignOption(id) {
+  state.designOptions.options = state.designOptions.options.filter(o => o.id !== id);
+  renderDesignOptions();
+  save();
+}
+
+function updateDesignOption(id, field, value) {
+  const opt = state.designOptions.options.find(o => o.id === id);
+  if (opt) { opt[field] = value; save(); }
+}
+
+function updateDesignOptionScore(id, criterion, value) {
+  const opt = state.designOptions.options.find(o => o.id === id);
+  if (opt) { opt.scores[criterion] = parseInt(value) || 1; renderDesignOptionScores(); save(); }
+}
+
+function renderDesignOptionScores() {
+  state.designOptions.options.forEach(opt => {
+    const criteria = state.criteria.rows.map(r => r.criterion).filter(Boolean);
+    const total = criteria.reduce((s, c) => s + (opt.scores[c] || 1), 0);
+    const max = criteria.length * 5 || 1;
+    const pct = Math.round((total / max) * 100);
+    const fillEl = document.getElementById('opt-fill-' + opt.id);
+    const scoreEl = document.getElementById('opt-score-' + opt.id);
+    if (fillEl) {
+      fillEl.style.width = pct + '%';
+      fillEl.className = 'score-bar-fill ' + (pct >= 70 ? 'score-high' : pct >= 40 ? 'score-mid' : 'score-low');
+    }
+    if (scoreEl) scoreEl.textContent = total + '/' + max;
+  });
+  // Show winner badge
+  document.querySelectorAll('.winner-badge').forEach(b => b.remove());
+  if (state.designOptions.options.length > 1) {
+    const criteria = state.criteria.rows.map(r => r.criterion).filter(Boolean);
+    let best = null, bestScore = -1;
+    state.designOptions.options.forEach(opt => {
+      const total = criteria.reduce((s, c) => s + (opt.scores[c] || 1), 0);
+      if (total > bestScore) { bestScore = total; best = opt.id; }
+    });
+    if (best) {
+      const nameEl = document.querySelector('[data-opt-name="' + best + '"]');
+      if (nameEl) {
+        const badge = document.createElement('span');
+        badge.className = 'winner-badge';
+        badge.textContent = 'Highest Score';
+        nameEl.parentNode.insertBefore(badge, nameEl.nextSibling);
+      }
+    }
+  }
+}
+
+function renderDesignOptions() {
+  const container = document.getElementById('design-options-container');
+  if (!container) return;
+  const criteria = state.criteria.rows.map(r => r.criterion).filter(Boolean);
+  if (state.designOptions.options.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-muted); font-size:13px; font-style:italic;">No options added yet. Click "+ Add Design Option" to begin.</p>';
+    return;
+  }
+  container.innerHTML = state.designOptions.options.map(opt => {
+    const total = criteria.reduce((s, c) => s + (opt.scores[c] || 1), 0);
+    const max = criteria.length * 5 || 1;
+    const pct = Math.round((total / max) * 100);
+    const criteriaRows = criteria.length > 0
+      ? criteria.map(c => `
+        <div style="margin-bottom:6px;">
+          <div style="font-size:11px; font-weight:600; color:var(--text-muted); margin-bottom:2px;">${esc(c)}</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="range" min="1" max="5" step="1" value="${opt.scores[c]||1}" style="flex:1;" oninput="updateDesignOptionScore(${opt.id},'${esc(c)}',this.value)">
+            <span style="font-size:12px; font-weight:700; min-width:12px;">${opt.scores[c]||1}</span>
+          </div>
+        </div>`).join('')
+      : '<p style="font-size:12px; color:var(--text-muted); font-style:italic;">Add Design Criteria first to score this option.</p>';
+
+    return `
+    <div class="option-card" style="margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+        <input type="text" value="${esc(opt.name)}" data-opt-name="${opt.id}" placeholder="Option name..." style="font-size:15px; font-weight:700; border:none; border-bottom:2px solid var(--border); border-radius:0; padding:2px 4px; width:200px;" oninput="updateDesignOption(${opt.id},'name',this.value)">
+        <button class="delete-btn" onclick="removeDesignOption(${opt.id})">×</button>
+      </div>
+      <div class="form-col" style="margin-bottom:10px;">
+        <label>Organizing Logic / Description</label>
+        <textarea rows="2" placeholder="How is this option structured? What is its core organizing rationale?" oninput="updateDesignOption(${opt.id},'description',this.value)" style="border:1px solid var(--border); border-radius:6px; padding:8px; font-family:inherit; width:100%; font-size:13px;">${esc(opt.description)}</textarea>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+        <div>
+          <label>Key Strengths</label>
+          <textarea rows="2" placeholder="What does this option do well?" oninput="updateDesignOption(${opt.id},'pros',this.value)" style="border:1px solid var(--border); border-radius:6px; padding:8px; font-family:inherit; width:100%; font-size:13px;">${esc(opt.pros)}</textarea>
+        </div>
+        <div>
+          <label>Key Risks / Trade-offs</label>
+          <textarea rows="2" placeholder="What does this option sacrifice or risk?" oninput="updateDesignOption(${opt.id},'cons',this.value)" style="border:1px solid var(--border); border-radius:6px; padding:8px; font-family:inherit; width:100%; font-size:13px;">${esc(opt.cons)}</textarea>
+        </div>
+      </div>
+      ${criteria.length > 0 ? `
+      <div>
+        <label style="margin-bottom:8px;">Score Against Design Criteria (1 = Fails, 5 = Excels)</label>
+        ${criteriaRows}
+        <div class="option-score" style="margin-top:8px;">
+          <div class="score-bar-wrap"><div id="opt-fill-${opt.id}" class="score-bar-fill ${pct>=70?'score-high':pct>=40?'score-mid':'score-low'}" style="width:${pct}%;"></div></div>
+          <span id="opt-score-${opt.id}" style="font-size:12px; font-weight:700;">${total}/${max}</span>
+        </div>
+      </div>` : criteriaRows}
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// DECISIONS & ACTIONS
+// ============================================================
+function renderDecisionsTable() {
+  const tbody = document.getElementById('decisions-body');
+  if (!tbody) return;
+  tbody.innerHTML = state.decisions.rows.map(r => `
+    <tr>
+      <td><textarea onchange="updateRow('decisions',${r.id},'decision',this.value)">${esc(r.decision)}</textarea></td>
+      <td><textarea onchange="updateRow('decisions',${r.id},'rationale',this.value)">${esc(r.rationale)}</textarea></td>
+      <td><input value="${esc(r.madeBy)}" onchange="updateRow('decisions',${r.id},'madeBy',this.value)" placeholder="Name / Role..."></td>
+      <td><button class="delete-btn" onclick="removeRow('decisions',${r.id})">×</button></td>
+    </tr>`).join('');
+}
+
+function renderActionsTable() {
+  const tbody = document.getElementById('actions-body');
+  if (!tbody) return;
+  tbody.innerHTML = state.actions.rows.map(r => `
+    <tr>
+      <td><textarea onchange="updateRow('actions',${r.id},'action',this.value)">${esc(r.action)}</textarea></td>
+      <td><input value="${esc(r.owner)}" onchange="updateRow('actions',${r.id},'owner',this.value)" placeholder="Name..."></td>
+      <td><input type="date" value="${esc(r.dueDate)}" onchange="updateRow('actions',${r.id},'dueDate',this.value)"></td>
+      <td><select onchange="updateRow('actions',${r.id},'status',this.value)">
+        ${['Open','In Progress','Complete','Blocked'].map(o => `<option ${r.status===o?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><button class="delete-btn" onclick="removeRow('actions',${r.id})">×</button></td>
+    </tr>`).join('');
+}
+
+// ============================================================
+// DIAGNOSTIC CALLOUT
+// ============================================================
+function renderDiagCallout() {
+  const box = document.getElementById('diag-callout-box');
+  if (!box) return;
+  const d = state.diagnostic;
+  const warnings = [];
+  const focus = [];
+  const good = [];
+  if (d.results === 'no') warnings.push('Results are unclear — begin with Gap Analysis before making any structural choices');
+  else if (d.results === 'partial') focus.push('Spend time in Gap Analysis to sharpen result clarity before advancing');
+  if (d.strategy === 'no') warnings.push('Strategy is unclear — structure cannot be designed without strategic direction');
+  else if (d.strategy === 'partial') focus.push('Use ANCHOR and Differentiating Activities sections to sharpen strategy before design');
+  if (d.systemic === 'individual') warnings.push('Issues appear individual, not systemic — OD redesign may not be the right intervention');
+  if (d.culture === 'undermines') focus.push('Culture is a barrier — Strategic Culture Behaviors section is high priority');
+  if (d.macro === 'no') focus.push('Macro structure needs redesign — prioritize Organizing Rationale and Design Options');
+  if (d.micro === 'no') focus.push('Micro design issues present — Process Evaluation and Aligning Org Choices are priorities');
+  if (d.ci === 'no') focus.push('No continuous improvement mechanism — capture this in Aligning Org Choices');
+  if (d.results === 'yes' && d.strategy === 'yes' && d.systemic === 'systemic') good.push('Strong foundation — results and strategy are clear, OD work is the right intervention');
+
+  let html = '';
+  if (warnings.length > 0) html += `<div class="diag-callout callout-warn"><h4>Stop — Address First</h4><ul>${warnings.map(w => `<li>${w}</li>`).join('')}</ul></div>`;
+  if (focus.length > 0) html += `<div class="diag-callout callout-info" style="margin-top:10px;"><h4>Recommended Focus Areas</h4><ul>${focus.map(f => `<li>${f}</li>`).join('')}</ul></div>`;
+  if (good.length > 0 && warnings.length === 0) html += `<div class="diag-callout callout-good" style="margin-top:10px;"><h4>Good to Proceed</h4><ul>${good.map(g => `<li>${g}</li>`).join('')}</ul></div>`;
+  box.innerHTML = html;
+}
+
+// ============================================================
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
+  renderDiagCallout();
   nav('setup');
   // Set today's date if empty
   const dateEl = document.getElementById('meta-date');
