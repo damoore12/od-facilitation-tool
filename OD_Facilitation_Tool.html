@@ -370,6 +370,7 @@ body.fac-mode .fac-only { display: block; }
 
   <div class="sidebar-section" style="margin-top:8px;">Output</div>
   <div class="nav-item" onclick="nav('action-plan')" id="nav-action-plan"><div class="nav-dot" id="dot-action-plan"></div> Action Plan</div>
+  <div class="nav-item" onclick="nav('reviewer-feedback')" id="nav-reviewer-feedback"><div class="nav-dot" id="dot-reviewer-feedback"></div> Reviewer Feedback</div>
   <div class="nav-item" onclick="nav('summary')" id="nav-summary"><div class="nav-dot" id="dot-summary"></div> Session Summary</div>
 </nav>
 
@@ -1725,6 +1726,132 @@ body.fac-mode .fac-only { display: block; }
   </div>
 </div>
 
+<!-- ============================================================ SECTION: REVIEWER FEEDBACK -->
+<div class="section" id="sec-reviewer-feedback">
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Reviewer Feedback</h2>
+      <p>Structured feedback for colleagues reviewing a shared session</p>
+    </div>
+    <div class="card-body">
+      <div class="tip-box">
+        <strong>How to use this section</strong>
+        The facilitator exports the session as JSON (Session Summary → Export JSON) and shares it with reviewers. Reviewers import the JSON, complete this section, then use "Export Feedback as JSON" to send their comments back.
+      </div>
+
+      <div class="form-grid" style="margin-top:16px;">
+        <div class="form-group">
+          <label>Reviewer Name</label>
+          <input type="text" id="rev-name" placeholder="e.g. Jane Smith" oninput="save()">
+        </div>
+        <div class="form-group">
+          <label>Role / Team</label>
+          <input type="text" id="rev-role" placeholder="e.g. VP HR, Finance Business Partner" oninput="save()">
+        </div>
+        <div class="form-group">
+          <label>Date of Review</label>
+          <input type="date" id="rev-date" oninput="save()">
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <label style="font-weight:600; font-size:13px; display:block; margin-bottom:10px;">Overall Recommendation</label>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:10px 16px; border:2px solid var(--border); border-radius:8px; font-size:13px; transition:all .15s;" id="rev-badge-approve">
+            <input type="radio" name="rev-overall" value="Approve" onchange="save(); updateRevBadges()"> Ready to Proceed
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:10px 16px; border:2px solid var(--border); border-radius:8px; font-size:13px; transition:all .15s;" id="rev-badge-revise">
+            <input type="radio" name="rev-overall" value="Revise" onchange="save(); updateRevBadges()"> Revise Before Proceeding
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:10px 16px; border:2px solid var(--border); border-radius:8px; font-size:13px; transition:all .15s;" id="rev-badge-more">
+            <input type="radio" name="rev-overall" value="More Info" onchange="save(); updateRevBadges()"> Need More Information
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Overall Assessment</h2>
+      <p>High-level observations on the design approach</p>
+    </div>
+    <div class="card-body">
+      <div class="form-group">
+        <label>Strengths — what's working well</label>
+        <textarea id="rev-strengths" rows="3" placeholder="What aspects of the design or process are particularly strong?" oninput="save()"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Areas for consideration</label>
+        <textarea id="rev-concerns" rows="3" placeholder="What should be revisited, clarified, or strengthened?" oninput="save()"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Questions or clarifications needed</label>
+        <textarea id="rev-questions" rows="3" placeholder="What is unclear or requires more context?" oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Section-Specific Comments</h2>
+      <p>Optional — comment on specific sections of the design</p>
+    </div>
+    <div class="card-body">
+      <div style="display:grid; gap:16px;">
+        <div class="form-group">
+          <label>Gap Analysis</label>
+          <textarea id="rev-gapComments" rows="2" placeholder="Comments on the gaps identified, stakeholders, or desired results..." oninput="save()"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Design Criteria</label>
+          <textarea id="rev-criteriaComments" rows="2" placeholder="Comments on the criteria, priorities, or non-negotiables..." oninput="save()"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Organizing Rationale</label>
+          <textarea id="rev-rationaleComments" rows="2" placeholder="Comments on the primary/secondary rationale or risk mitigation..." oninput="save()"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Recommended Path &amp; Design Decisions</label>
+          <textarea id="rev-designComments" rows="2" placeholder="Comments on the recommended tools, design options, or key decisions..." oninput="save()"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Action Plan</label>
+          <textarea id="rev-actionComments" rows="2" placeholder="Comments on the action items, owners, or timelines..." oninput="save()"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Additional Notes</label>
+          <textarea id="rev-additionalNotes" rows="3" placeholder="Any other observations, context, or recommendations..." oninput="save()"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Export Feedback</h2>
+      <p>Share your feedback with the facilitator</p>
+    </div>
+    <div class="card-body">
+      <div class="btn-group" style="margin-bottom:16px;">
+        <button class="btn btn-primary" onclick="exportReviewerFeedback()">Export Feedback as JSON</button>
+        <button class="btn btn-outline" onclick="exportJSON()">Export Full Session + Feedback</button>
+      </div>
+      <div class="guide-box">
+        <h4>Feedback workflow</h4>
+        <ol style="margin:8px 0 0 18px; font-size:13px; line-height:2;">
+          <li>Fill in your name, overall recommendation, and comments above</li>
+          <li>Click <strong>Export Feedback as JSON</strong> to download a slim feedback file</li>
+          <li>Send the JSON file back to the facilitator (email, Teams, etc.)</li>
+          <li>The facilitator imports it via Session Summary → Import JSON to see your feedback alongside the full session</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 <!-- ============================================================ SECTION: SUMMARY -->
 <div class="section" id="sec-summary">
   <div class="card">
@@ -1759,7 +1886,7 @@ body.fac-mode .fac-only { display: block; }
 // ============================================================
 // STATE
 // ============================================================
-const SECTIONS = ['getting-started','setup','diagnostic','gap','design-criteria','org-rationale','linkages','guidance','stakeholder','anchor','diff-activities','culture-behaviors','business-model','work-cat','placement','raci','span-control','design-options','process-eval','org-choices','action-plan','summary'];
+const SECTIONS = ['getting-started','setup','diagnostic','gap','design-criteria','org-rationale','linkages','guidance','stakeholder','anchor','diff-activities','culture-behaviors','business-model','work-cat','placement','raci','span-control','design-options','process-eval','org-choices','action-plan','reviewer-feedback','summary'];
 let currentSection = 'setup';
 
 const defaultState = () => ({
@@ -1782,7 +1909,8 @@ const defaultState = () => ({
   soc: { strategy:3, mgrcap:3, work:3, empcap:3, depend:3, goals:3, tech:3, location:3, notes:'' },
   designOptions: { options:[], recommendation:'' },
   decisions: { rows:[], followup:'' },
-  actions: { rows:[] }
+  actions: { rows:[] },
+  reviewer: { name:'', role:'', date:'', overall:'', strengths:'', concerns:'', questions:'', gapComments:'', criteriaComments:'', rationaleComments:'', designComments:'', actionComments:'', additionalNotes:'' }
 });
 
 let state = defaultState();
@@ -1937,6 +2065,13 @@ function collectFormState() {
   // decisions / actions
   const afollowup = document.getElementById('action-followup');
   if (afollowup) state.decisions.followup = afollowup.value;
+  // reviewer feedback
+  ['name','role','date','strengths','concerns','questions','gapComments','criteriaComments','rationaleComments','designComments','actionComments','additionalNotes'].forEach(k => {
+    const el = document.getElementById('rev-' + k);
+    if (el) state.reviewer[k] = el.value;
+  });
+  const revOverall = document.querySelector('input[name="rev-overall"]:checked');
+  if (revOverall) state.reviewer.overall = revOverall.value;
 }
 
 function applyStateToForm() {
@@ -2019,6 +2154,18 @@ function applyStateToForm() {
   if (doRec) doRec.value = state.designOptions.recommendation || '';
   const afollowup = document.getElementById('action-followup');
   if (afollowup) afollowup.value = state.decisions.followup || '';
+  // reviewer feedback
+  if (state.reviewer) {
+    ['name','role','date','strengths','concerns','questions','gapComments','criteriaComments','rationaleComments','designComments','actionComments','additionalNotes'].forEach(k => {
+      const el = document.getElementById('rev-' + k);
+      if (el) el.value = state.reviewer[k] || '';
+    });
+    if (state.reviewer.overall) {
+      const el = document.querySelector('input[name="rev-overall"][value="' + state.reviewer.overall + '"]');
+      if (el) el.checked = true;
+    }
+    updateRevBadges();
+  }
   updateSoc();
   renderDesignOptions();
   renderDecisionsTable();
@@ -2054,6 +2201,7 @@ function updateDots() {
     'span-control': () => state.soc.notes,
     'design-options': () => state.designOptions.options.length > 0,
     'action-plan': () => state.actions.rows.length > 0 || state.decisions.rows.length > 0,
+    'reviewer-feedback': () => !!(state.reviewer && state.reviewer.name && state.reviewer.overall),
     summary: () => false
   };
   SECTIONS.forEach(s => {
@@ -2372,7 +2520,25 @@ function renderSummary() {
   const activeMechs = Object.entries(state.linkages.selected).filter(([,v]) => v).map(([k]) => k).join(', ');
   const diagSummary = ['results','strategy','systemic','culture','macro','micro','ci'].map(k => `${k}: ${state.diagnostic[k]||'—'}`).join(' | ');
 
-  el.innerHTML = `
+  const revBadgeColors = { Approve: '#27ae60', Revise: '#e67e22', 'More Info': '#2980b9' };
+  const revBlock = (state.reviewer && state.reviewer.name) ? `
+    <div class="summary-section" style="border-left:4px solid ${revBadgeColors[state.reviewer.overall] || 'var(--border)'}; padding-left:16px;">
+      <h3>Reviewer Feedback</h3>
+      ${field('Reviewer', (state.reviewer.name || '') + (state.reviewer.role ? ' — ' + state.reviewer.role : ''))}
+      ${field('Date of Review', state.reviewer.date)}
+      ${state.reviewer.overall ? `<div class="summary-field"><span class="label">Recommendation</span><span style="font-weight:700; color:${revBadgeColors[state.reviewer.overall] || 'inherit'};">${esc(state.reviewer.overall)}</span></div>` : ''}
+      ${field('Strengths', state.reviewer.strengths)}
+      ${field('Areas for Consideration', state.reviewer.concerns)}
+      ${field('Questions', state.reviewer.questions)}
+      ${field('Gap Analysis', state.reviewer.gapComments)}
+      ${field('Design Criteria', state.reviewer.criteriaComments)}
+      ${field('Organizing Rationale', state.reviewer.rationaleComments)}
+      ${field('Design Decisions', state.reviewer.designComments)}
+      ${field('Action Plan', state.reviewer.actionComments)}
+      ${field('Additional Notes', state.reviewer.additionalNotes)}
+    </div>` : '';
+
+  el.innerHTML = revBlock + `
     <div class="summary-section">
       <h3>Session Information</h3>
       ${field('Organization', state.meta.orgName)}
@@ -2448,6 +2614,36 @@ function renderSummary() {
 // ============================================================
 // EXPORT / IMPORT
 // ============================================================
+function exportReviewerFeedback() {
+  collectFormState();
+  const payload = {
+    meta: { orgName: state.meta.orgName, sessionDate: state.meta.date },
+    reviewer: state.reviewer
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const rName = (state.reviewer.name || 'reviewer').replace(/\s+/g, '-');
+  const org = (state.meta.orgName || 'session').replace(/\s+/g, '-');
+  a.download = `od-review-${org}-${rName}.json`;
+  a.click();
+}
+
+function updateRevBadges() {
+  const val = (document.querySelector('input[name="rev-overall"]:checked') || {}).value || state.reviewer.overall;
+  const colors = { Approve: '#27ae60', Revise: '#e67e22', 'More Info': '#2980b9' };
+  ['approve','revise','more'].forEach(id => {
+    const el = document.getElementById('rev-badge-' + id);
+    if (!el) return;
+    el.style.borderColor = 'var(--border)';
+    el.style.background = '';
+    el.style.color = '';
+  });
+  if (val === 'Approve') { const el = document.getElementById('rev-badge-approve'); if (el) { el.style.borderColor = colors.Approve; el.style.background = '#f0fdf4'; el.style.color = colors.Approve; } }
+  if (val === 'Revise') { const el = document.getElementById('rev-badge-revise'); if (el) { el.style.borderColor = colors.Revise; el.style.background = '#fff7ed'; el.style.color = colors.Revise; } }
+  if (val === 'More Info') { const el = document.getElementById('rev-badge-more'); if (el) { el.style.borderColor = colors['More Info']; el.style.background = '#eff6ff'; el.style.color = colors['More Info']; } }
+}
+
 function exportJSON() {
   collectFormState();
   const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
