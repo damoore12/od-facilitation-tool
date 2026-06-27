@@ -188,6 +188,52 @@ body.fac-mode .fac-only { display: block; }
 .summary-field { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--bg); font-size: 13px; }
 .summary-field .label { font-weight: 600; color: var(--text-muted); min-width: 180px; }
 
+/* Welcome modal */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:500; display:flex; align-items:center; justify-content:center; }
+.modal-card { background:white; border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,0.25); max-width:560px; width:90%; overflow:hidden; }
+.modal-header { background:linear-gradient(135deg,var(--primary),var(--primary-light)); color:white; padding:24px 28px 18px; }
+.modal-header h2 { font-size:20px; font-weight:700; margin-bottom:4px; }
+.modal-header p { font-size:13px; opacity:0.8; }
+.modal-body { padding:24px 28px; min-height:180px; }
+.modal-body h3 { font-size:16px; font-weight:700; color:var(--primary); margin-bottom:12px; }
+.modal-body p { font-size:14px; color:var(--text); line-height:1.6; margin-bottom:10px; }
+.modal-body ul { padding-left:20px; font-size:14px; color:var(--text); }
+.modal-body li { margin-bottom:6px; line-height:1.5; }
+.modal-flow { display:flex; gap:0; margin:16px 0; }
+.modal-flow-step { flex:1; text-align:center; padding:12px 8px; background:var(--bg); border:1px solid var(--border); font-size:12px; }
+.modal-flow-step:first-child { border-radius:8px 0 0 8px; }
+.modal-flow-step:last-child { border-radius:0 8px 8px 0; }
+.modal-flow-step .step-num { font-size:20px; font-weight:800; color:var(--secondary); display:block; }
+.modal-flow-step .step-label { font-weight:700; color:var(--primary); font-size:12px; display:block; margin:2px 0; }
+.modal-flow-arrow { display:flex; align-items:center; color:var(--text-muted); font-size:18px; padding:0 2px; }
+.modal-pips { display:flex; justify-content:center; gap:8px; padding:12px 0; }
+.modal-pip { width:8px; height:8px; border-radius:50%; background:var(--border); transition:background 0.2s; }
+.modal-pip.active { background:var(--secondary); }
+.modal-footer { padding:14px 28px 20px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); }
+.modal-feature-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+.modal-feature { background:var(--bg); border-radius:6px; padding:10px 12px; font-size:13px; }
+.modal-feature strong { display:block; color:var(--primary); margin-bottom:2px; }
+
+/* Getting Started section */
+.gs-flow { display:flex; align-items:stretch; gap:0; margin:16px 0; border-radius:10px; overflow:hidden; border:1px solid var(--border); }
+.gs-step { flex:1; padding:16px 12px; text-align:center; background:var(--bg); border-right:1px solid var(--border); }
+.gs-step:last-child { border-right:none; }
+.gs-step-num { font-size:24px; font-weight:800; color:var(--secondary); display:block; line-height:1; }
+.gs-step-label { font-size:12px; font-weight:700; color:var(--primary); display:block; margin:4px 0 2px; }
+.gs-step-sub { font-size:11px; color:var(--text-muted); }
+.gs-feature-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+.gs-feature { border:1px solid var(--border); border-radius:8px; padding:12px 14px; background:var(--card-bg); }
+.gs-feature strong { display:block; font-size:13px; color:var(--primary); margin-bottom:3px; }
+.gs-feature span { font-size:12px; color:var(--text-muted); line-height:1.4; }
+.gs-checklist { list-style:none; padding:0; margin:0; }
+.gs-checklist li { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--bg); font-size:13px; }
+.gs-checklist li:last-child { border-bottom:none; }
+.gs-checklist input[type=checkbox] { margin-top:2px; accent-color:var(--secondary); flex-shrink:0; }
+.gs-tips { list-style:none; padding:0; margin:0; }
+.gs-tips li { padding:8px 0 8px 20px; border-bottom:1px solid var(--bg); font-size:13px; position:relative; }
+.gs-tips li:last-child { border-bottom:none; }
+.gs-tips li::before { content:"→"; position:absolute; left:0; color:var(--secondary); font-weight:700; }
+
 /* Guidance engine */
 .guidance-card { border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; background: var(--card-bg); }
 .guidance-card.strong { border-left: 4px solid var(--secondary); }
@@ -292,6 +338,7 @@ body.fac-mode .fac-only { display: block; }
   <div style="padding:16px 16px 8px; font-size:11px; color:rgba(255,255,255,0.5); border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:8px;">AlignOrg Framework</div>
 
   <div class="sidebar-section">Session</div>
+  <div class="nav-item" onclick="nav('getting-started')" id="nav-getting-started"><div class="nav-dot" id="dot-getting-started"></div> <span style="font-style:italic;">Getting Started</span></div>
   <div class="nav-item" onclick="nav('setup')" id="nav-setup"><div class="nav-dot" id="dot-setup"></div> Session Setup</div>
   <div class="nav-item" onclick="nav('diagnostic')" id="nav-diagnostic"><div class="nav-dot" id="dot-diagnostic"></div> Diagnostic Framework</div>
 
@@ -327,6 +374,175 @@ body.fac-mode .fac-only { display: block; }
 </nav>
 
 <main id="main">
+
+<!-- ============================================================ WELCOME MODAL -->
+<div id="modal-overlay" class="modal-overlay" style="display:none;" onclick="handleModalOverlayClick(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Organization Design Facilitation Tool</h2>
+      <p>Powered by the AlignOrg Framework — a quick orientation before you begin</p>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-pips" id="modal-pips"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" id="modal-prev" onclick="prevModalSlide()" style="visibility:hidden;">&#8592; Back</button>
+      <button class="btn btn-outline btn-sm" onclick="dismissModal()">Skip</button>
+      <button class="btn btn-primary btn-sm" id="modal-next" onclick="nextModalSlide()">Next &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ SECTION: GETTING STARTED -->
+<div class="section active" id="sec-getting-started">
+
+  <div class="card">
+    <div class="card-header">
+      <h2>About This Tool</h2>
+      <p>What it is, who it's for, and what it produces</p>
+    </div>
+    <div class="card-body">
+      <p style="font-size:14px; line-height:1.7; margin-bottom:12px;">This is an <strong>interactive facilitation aid</strong> for People &amp; Culture Strategy Partners working through organizational design engagements using the <strong>AlignOrg framework</strong>. It is designed to be run on the facilitator's screen — or projected as a shared working surface — to capture decisions and guide the group through a structured design process.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:16px;">
+        <div style="background:var(--bg); border-radius:8px; padding:14px; text-align:center;">
+          <div style="font-size:22px; font-weight:800; color:var(--secondary);">20+</div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">AlignOrg tools built in</div>
+        </div>
+        <div style="background:var(--bg); border-radius:8px; padding:14px; text-align:center;">
+          <div style="font-size:22px; font-weight:800; color:var(--secondary);">Live</div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Personalized recommendations as you work</div>
+        </div>
+        <div style="background:var(--bg); border-radius:8px; padding:14px; text-align:center;">
+          <div style="font-size:22px; font-weight:800; color:var(--secondary);">Export</div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Session summary to PDF or JSON</div>
+        </div>
+      </div>
+      <div class="tip-box" style="margin-top:16px;">
+        <strong>Who sees what</strong>
+        The tool separates facilitator content from participant content. Enable <strong>Facilitator Mode</strong> (top right toggle) to reveal preparation notes and facilitation tips that are hidden during group sessions.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>How the Tool Works</h2>
+      <p>Three steps from context to recommendations to decisions</p>
+    </div>
+    <div class="card-body">
+      <div class="gs-flow">
+        <div class="gs-step">
+          <span class="gs-step-num">1</span>
+          <span class="gs-step-label">Complete Core Macro Steps</span>
+          <span class="gs-step-sub">Gap Analysis → Design Criteria → Organizing Rationale → Linkages</span>
+        </div>
+        <div class="gs-step">
+          <span class="gs-step-num">2</span>
+          <span class="gs-step-label">Visit Recommended Path</span>
+          <span class="gs-step-sub">The tool analyses your inputs and tells you which additional tools are worth your time</span>
+        </div>
+        <div class="gs-step">
+          <span class="gs-step-num">3</span>
+          <span class="gs-step-label">Work Recommended Sections</span>
+          <span class="gs-step-sub">Use only what's relevant — not every section needs to be completed</span>
+        </div>
+      </div>
+      <div class="guide-box">
+        <h4>The Diagnostic Framework + Recommended Path work together</h4>
+        <ul>
+          <li>Complete the <strong>Diagnostic Framework</strong> (under Session) before the group session — it generates warning flags and focus areas that feed directly into Recommended Path</li>
+          <li><strong>Recommended Path</strong> (after Linkages in the sidebar) is your dynamic session agenda — it updates live as you enter data</li>
+          <li>Amber dots (●) appear next to strongly recommended sections in the sidebar so you never have to leave a section to check recommendations</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Key Features</h2>
+      <p>Reference guide to the tool's main capabilities</p>
+    </div>
+    <div class="card-body">
+      <div class="gs-feature-grid">
+        <div class="gs-feature">
+          <strong>Facilitator Mode</strong>
+          <span>Toggle (top right) — reveals facilitator prep notes hidden from participants. Turn on before your session to preview facilitation guidance.</span>
+        </div>
+        <div class="gs-feature">
+          <strong>Recommended Path ★</strong>
+          <span>Analyses Gap Analysis, Design Criteria, Organizing Rationale, and Linkages to recommend which Additional Macro and Micro tools matter for this engagement.</span>
+        </div>
+        <div class="gs-feature">
+          <strong>Diagnostic Framework</strong>
+          <span>7 questions that generate stop/focus/proceed flags. Answers feed the Recommended Path — fill this in before the group session begins.</span>
+        </div>
+        <div class="gs-feature">
+          <strong>Auto-Save</strong>
+          <span>All data saves automatically to this browser. Your session persists between visits on the same device — no manual save needed.</span>
+        </div>
+        <div class="gs-feature">
+          <strong>Export / Import JSON</strong>
+          <span>Export your session as a JSON file to archive, hand off, or resume on another device. Import to restore any previous session.</span>
+        </div>
+        <div class="gs-feature">
+          <strong>Print / PDF Export</strong>
+          <span>Navigate to Session Summary → Print to generate a formatted PDF of all completed sections — ready to share with stakeholders.</span>
+        </div>
+        <div class="gs-feature">
+          <strong>Progress Dots</strong>
+          <span>Sidebar dots fill as you complete each section. Track coverage at a glance during long sessions.</span>
+        </div>
+        <div class="gs-feature">
+          <strong>Amber Dots (●)</strong>
+          <span>Appear next to sections the guidance engine recommends for your specific engagement — visible without leaving your current section.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Before Your Session</h2>
+      <p>Facilitator preparation checklist</p>
+    </div>
+    <div class="card-body">
+      <div class="fac-only fac-note">
+        <h4>Facilitator Note</h4>
+        Work through this checklist before participants join. The diagnostic and recommended path should be reviewed in advance so you arrive with a proposed session agenda.
+      </div>
+      <ul class="gs-checklist">
+        <li><input type="checkbox"> Complete <strong>Session Setup</strong> — org name, scope, objectives, and design constraints</li>
+        <li><input type="checkbox"> Run through the <strong>Diagnostic Framework</strong> — answer all 7 questions and review the generated flags</li>
+        <li><input type="checkbox"> Review <strong>Recommended Path</strong> — use it to build your session agenda and decide which sections to prioritize</li>
+        <li><input type="checkbox"> Enable <strong>Facilitator Mode</strong> and read the facilitator notes for each section you plan to use</li>
+        <li><input type="checkbox"> If continuing a prior session — <strong>Import JSON</strong> from the Session Summary section to restore previous data</li>
+        <li><input type="checkbox"> Confirm the <strong>design scope</strong> with the sponsor — what is and is not available for redesign</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>During Your Session</h2>
+      <p>Facilitation tips for running effective OD sessions with this tool</p>
+    </div>
+    <div class="card-body">
+      <ul class="gs-tips">
+        <li>Follow the <strong>core steps in order</strong> (Gap Analysis → Design Criteria → Organizing Rationale → Linkages) before moving to situational tools — each step informs the next</li>
+        <li>Share the <strong>Recommended Path</strong> with participants to align the group on which additional tools you will and won't be using in this session</li>
+        <li>Use the <strong>guide-box questions</strong> in each section to drive discussion — the tool captures decisions and outputs, not verbatim conversation</li>
+        <li><strong>Facilitator notes</strong> (visible in Facilitator Mode) are for the P&amp;C partner only — disable Facilitator Mode before projecting to participants</li>
+        <li>The <strong>RACI table, Design Options, and Action Plan</strong> are most powerful at the end of a session — use them to close out decisions and assign ownership before participants leave the room</li>
+        <li>Use <strong>JSON Export</strong> at the end of each session to create a checkpoint — do this before clearing or closing the browser</li>
+        <li>If the group gets stuck, return to <strong>Gap Analysis</strong> — most design disagreements trace back to unresolved gaps in desired results</li>
+      </ul>
+      <div style="margin-top:16px; text-align:center;">
+        <button class="btn btn-outline btn-sm" onclick="resetWelcome()">Show welcome walkthrough again</button>
+      </div>
+    </div>
+  </div>
+
+</div>
 
 <!-- ============================================================ SECTION: SETUP -->
 <div class="section active" id="sec-setup">
@@ -1543,7 +1759,7 @@ body.fac-mode .fac-only { display: block; }
 // ============================================================
 // STATE
 // ============================================================
-const SECTIONS = ['setup','diagnostic','gap','design-criteria','org-rationale','linkages','guidance','stakeholder','anchor','diff-activities','culture-behaviors','business-model','work-cat','placement','raci','span-control','design-options','process-eval','org-choices','action-plan','summary'];
+const SECTIONS = ['getting-started','setup','diagnostic','gap','design-criteria','org-rationale','linkages','guidance','stakeholder','anchor','diff-activities','culture-behaviors','business-model','work-cat','placement','raci','span-control','design-options','process-eval','org-choices','action-plan','summary'];
 let currentSection = 'setup';
 
 const defaultState = () => ({
@@ -1817,6 +2033,7 @@ function updateOrgName() {
 
 function updateDots() {
   const checks = {
+    'getting-started': () => false,
     setup: () => state.meta.orgName || state.meta.objectives,
     diagnostic: () => state.diagnostic.results,
     guidance: () => false,
@@ -2767,6 +2984,115 @@ function renderDiagCallout() {
 }
 
 // ============================================================
+// WELCOME MODAL
+// ============================================================
+const MODAL_SLIDES = [
+  {
+    title: 'Welcome to the OD Facilitation Tool',
+    html: `<p>This tool guides P&amp;C Strategy Partners through organizational design engagements using the <strong>AlignOrg framework</strong>.</p>
+<p style="margin-top:10px;">It is designed to run on <strong>your screen</strong> — or as a shared working surface — capturing decisions in real time as you facilitate the group.</p>
+<p style="margin-top:10px;">Your work <strong>saves automatically</strong> in this browser. Nothing is sent anywhere — it lives entirely on your device.</p>`
+  },
+  {
+    title: 'The AlignOrg Flow',
+    html: `<p style="margin-bottom:14px;">The tool follows a two-phase structure. Start with the four core steps, then let the Recommended Path guide the rest.</p>
+<div class="modal-flow">
+  <div class="modal-flow-step"><strong>1</strong><span>Core Macro Steps</span><small>Gap → Criteria → Rationale → Linkages</small></div>
+  <div class="modal-flow-arrow">&#8594;</div>
+  <div class="modal-flow-step"><strong>2</strong><span>Recommended Path ★</span><small>Personalised to your inputs</small></div>
+  <div class="modal-flow-arrow">&#8594;</div>
+  <div class="modal-flow-step"><strong>3</strong><span>Situational Tools</span><small>Only what's relevant</small></div>
+</div>
+<p style="margin-top:14px; font-size:13px; color:var(--text-muted);">Not every section needs to be completed — the Recommended Path is your agenda.</p>`
+  },
+  {
+    title: 'Facilitator Mode',
+    html: `<p>The tool separates content meant for <strong>you</strong> from content meant for <strong>participants</strong>.</p>
+<p style="margin-top:10px;">Toggle <strong>Facilitator Mode</strong> (top right of the tool) to reveal:</p>
+<ul style="margin:10px 0 0 18px; font-size:13px; line-height:1.9;">
+  <li>Facilitation notes and prompts inside each section</li>
+  <li>Diagnostic framework prep questions</li>
+  <li>Context on why each tool matters</li>
+</ul>
+<div class="tip-box" style="margin-top:14px;"><strong>Tip:</strong> Turn Facilitator Mode on before your session to preview all guidance, then turn it off before projecting to participants.</div>`
+  },
+  {
+    title: 'The Recommended Path',
+    html: `<p>After completing the four core steps, visit <strong>Recommended Path ★</strong> in the sidebar. The tool analyses your inputs — including Diagnostic Framework answers — and tells you which Additional Macro and Micro Design tools are worth your time for this specific engagement.</p>
+<p style="margin-top:10px;"><strong>Amber dots (●)</strong> appear next to recommended sections directly in the sidebar, so you always know where to go next without leaving your current section.</p>
+<div class="guide-box" style="margin-top:14px;">Complete the <strong>Diagnostic Framework</strong> before the group session — its answers feed directly into the Recommended Path logic.</div>`
+  },
+  {
+    title: "You're Ready",
+    html: `<p>Here's how to get started:</p>
+<ol style="margin:12px 0 0 18px; font-size:13px; line-height:2;">
+  <li>Go to <strong>Getting Started</strong> to read the facilitator prep checklist</li>
+  <li>Complete <strong>Session Setup</strong> with the org name, scope, and objectives</li>
+  <li>Run through the <strong>Diagnostic Framework</strong> before participants arrive</li>
+  <li>Begin the group session with <strong>Gap Analysis</strong></li>
+</ol>
+<p style="margin-top:14px; font-size:13px; color:var(--text-muted);">You can revisit this walkthrough any time from the Getting Started section.</p>`
+  }
+];
+
+let modalSlide = 0;
+
+function showWelcomeModal() {
+  if (localStorage.getItem('od-tool-welcomed')) return;
+  modalSlide = 0;
+  renderModalSlide();
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function renderModalSlide() {
+  const slide = MODAL_SLIDES[modalSlide];
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `<h3 style="font-size:17px; font-weight:700; margin-bottom:12px;">${slide.title}</h3>${slide.html}`;
+
+  // Pips
+  const pips = document.getElementById('modal-pips');
+  pips.innerHTML = MODAL_SLIDES.map((_, i) =>
+    `<span class="modal-pip${i === modalSlide ? ' active' : ''}" onclick="goModalSlide(${i})"></span>`
+  ).join('');
+
+  // Buttons
+  const prev = document.getElementById('modal-prev');
+  const next = document.getElementById('modal-next');
+  prev.style.visibility = modalSlide === 0 ? 'hidden' : 'visible';
+  if (modalSlide === MODAL_SLIDES.length - 1) {
+    next.textContent = 'Get Started';
+    next.onclick = dismissModal;
+  } else {
+    next.textContent = 'Next →';
+    next.onclick = nextModalSlide;
+  }
+}
+
+function nextModalSlide() {
+  if (modalSlide < MODAL_SLIDES.length - 1) { modalSlide++; renderModalSlide(); }
+}
+function prevModalSlide() {
+  if (modalSlide > 0) { modalSlide--; renderModalSlide(); }
+}
+function goModalSlide(i) { modalSlide = i; renderModalSlide(); }
+
+function dismissModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+  localStorage.setItem('od-tool-welcomed', '1');
+}
+
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) dismissModal();
+}
+
+function resetWelcome() {
+  localStorage.removeItem('od-tool-welcomed');
+  modalSlide = 0;
+  renderModalSlide();
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+// ============================================================
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -2779,6 +3105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dateEl.value = new Date().toISOString().split('T')[0];
     save();
   }
+  showWelcomeModal();
 });
 </script>
 </body>
