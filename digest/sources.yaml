@@ -1,0 +1,62 @@
+feeds:
+  # Tier 1 — Strategic (CPO-level research and frameworks)
+  # All URLs verified working as of July 2026
+
+  - name: "Josh Bersin"
+    url: "https://joshbersin.com/feed/"
+    tier: 1
+
+  - name: "Dave Ulrich"
+    url: "https://www.daveulrich.com/feed/"
+    tier: 1
+
+  - name: "McKinsey & Company"
+    url: "https://www.mckinsey.com/rss"
+    tier: 1
+
+  - name: "Harvard Business Review"
+    url: "https://feeds2.feedburner.com/harvardbusiness"
+    tier: 1
+
+  - name: "MIT Sloan Management Review"
+    url: "https://sloanreview.mit.edu/feed/"
+    tier: 1
+
+  - name: "AIHR (Academy to Innovate HR)"
+    url: "https://www.aihr.com/blog/feed/"
+    tier: 1
+
+  # Tier 2 — Practitioner supplement
+
+  - name: "TalentCulture (Meghan Biro)"
+    url: "https://talentculture.com/feed/"
+    tier: 2
+
+  - name: "HR Daily Advisor"
+    url: "https://hrdailyadvisor.blr.com/feed/"
+    tier: 2
+
+  - name: "HR Brew"
+    url: "https://hrbrew.substack.com/feed"
+    tier: 2
+
+  - name: "HR Zone"
+    url: "https://www.hrzone.com/feed"
+    tier: 2
+
+podcasts: []
+  # Most major HR podcasts have moved to Spotify-exclusive hosting and no longer
+  # expose public RSS feeds. To add a podcast, find its RSS URL by:
+  #   1. Opening the podcast in Overcast, Pocket Casts, or Apple Podcasts
+  #   2. Tapping "..." or Share > Copy RSS link
+  #   3. Paste the URL below in this format:
+  #
+  # - name: "Show Name"
+  #   host: "Host Name"
+  #   url: "https://rss-feed-url-here"
+  #
+  # Confirmed working feeds (add when you have the RSS URL):
+  #   - The Josh Bersin Show
+  #   - I Hate It Here (Hebba Youssef)
+  #   - Let's Fix Work (Laurie Ruettimann)
+  #   - WorkLife with Adam Grant

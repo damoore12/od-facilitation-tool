@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPO Weekly Digest — {{ week_date }}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f0;font-family:'Georgia',serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f0;">
+<tr><td align="center" style="padding:24px 16px;">
+
+  <!-- OUTER CONTAINER -->
+  <table width="680" cellpadding="0" cellspacing="0" style="max-width:680px;width:100%;">
+
+    <!-- HEADER -->
+    <tr><td style="background:#1a2744;border-radius:8px 8px 0 0;padding:36px 40px 28px;">
+      <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8fa3c8;font-family:Arial,sans-serif;">Chief People Officer</p>
+      <h1 style="margin:8px 0 4px;font-size:28px;color:#ffffff;font-weight:normal;letter-spacing:-0.5px;">Weekly Digest</h1>
+      <p style="margin:0;color:#8fa3c8;font-size:14px;font-family:Arial,sans-serif;">{{ week_date }}</p>
+    </td></tr>
+
+    <!-- SUMMARY BAR -->
+    <tr><td style="background:#243460;padding:14px 40px;">
+      <p style="margin:0;color:#c8d8f0;font-size:13px;font-family:Arial,sans-serif;">
+        This week: <strong style="color:#ffffff;">{{ total_articles }} articles</strong> curated across
+        <strong style="color:#ffffff;">{{ articles_by_category|length }} themes</strong>
+        {% if total_podcasts > 0 %}
+        + <strong style="color:#ffffff;">{{ total_podcasts }} podcast episode{{ 's' if total_podcasts != 1 }}</strong>
+        {% endif %}
+        — filtered for CPO relevance and impact.
+      </p>
+    </td></tr>
+
+    <!-- TABLE OF CONTENTS -->
+    <tr><td style="background:#ffffff;padding:24px 40px 8px;border-left:1px solid #e8e8e4;border-right:1px solid #e8e8e4;">
+      <p style="margin:0 0 12px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#8a8a88;font-family:Arial,sans-serif;">In this issue</p>
+      <table cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="vertical-align:top;width:50%;padding-right:16px;">
+            {% set ns = namespace(count=0) %}
+            {% for category, articles in articles_by_category.items() %}
+              {% if ns.count < ((articles_by_category|length + 1) // 2) %}
+                <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#2c3e6b;">
+                  {{ category }} <span style="color:#a0a0a0;">({{ articles|length }})</span>
+                </p>
+                {% set ns.count = ns.count + 1 %}
+              {% endif %}
+            {% endfor %}
+          </td>
+          <td style="vertical-align:top;width:50%;">
+            {% set ns2 = namespace(count=0) %}
+            {% for category, articles in articles_by_category.items() %}
+              {% if ns2.count >= ((articles_by_category|length + 1) // 2) %}
+                <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#2c3e6b;">
+                  {{ category }} <span style="color:#a0a0a0;">({{ articles|length }})</span>
+                </p>
+              {% endif %}
+              {% set ns2.count = ns2.count + 1 %}
+            {% endfor %}
+            {% if total_podcasts > 0 %}
+              <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#2c3e6b;">
+                Podcasts Worth Your Ears <span style="color:#a0a0a0;">({{ total_podcasts }})</span>
+              </p>
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+
+    <!-- DIVIDER -->
+    <tr><td style="background:#ffffff;padding:0 40px 16px;border-left:1px solid #e8e8e4;border-right:1px solid #e8e8e4;">
+      <hr style="border:none;border-top:1px solid #e8e8e4;margin:0;">
+    </td></tr>
+
+    <!-- ARTICLE SECTIONS -->
+    {% for category, articles in articles_by_category.items() %}
+    <tr><td style="background:#ffffff;padding:8px 40px 4px;border-left:1px solid #e8e8e4;border-right:1px solid #e8e8e4;">
+
+      <!-- Category header -->
+      <table cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="padding-bottom:16px;">
+            <span style="display:inline-block;background:#1a2744;color:#ffffff;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:3px;font-family:Arial,sans-serif;">{{ category }}</span>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Articles in this category -->
+      {% for article in articles %}
+      <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:20px;">
+        <tr>
+          <td style="border-left:3px solid {% if article.score == 5 %}#c0392b{% elif article.score == 4 %}#2c6fad{% else %}#7a9e7a{% endif %};padding-left:14px;">
+
+            <!-- Score badge + source -->
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-bottom:4px;">
+                  <span style="font-size:10px;font-family:Arial,sans-serif;font-weight:bold;color:{% if article.score == 5 %}#c0392b{% elif article.score == 4 %}#2c6fad{% else %}#5a8a5a{% endif %};">
+                    {% if article.score == 5 %}▲ STRATEGIC{% elif article.score == 4 %}● HIGH RELEVANCE{% else %}○ WORTH NOTING{% endif %}
+                  </span>
+                  <span style="font-size:10px;font-family:Arial,sans-serif;color:#a0a0a0;margin-left:8px;">{{ article.source }}{% if article.published %} · {{ article.published }}{% endif %}</span>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Headline -->
+            <h3 style="margin:0 0 8px;font-size:15px;font-weight:bold;color:#1a2744;line-height:1.4;">
+              <a href="{{ article.url }}" style="color:#1a2744;text-decoration:none;">{{ article.title }}</a>
+            </h3>
+
+            <!-- Summary -->
+            <p style="margin:0 0 8px;font-size:13px;line-height:1.6;color:#444444;">{{ article.digest_summary }}</p>
+
+            <!-- CPO Action -->
+            <table cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="background:#f0f4fa;border-radius:4px;padding:8px 12px;">
+                  <p style="margin:0;font-size:12px;font-family:Arial,sans-serif;color:#2c3e6b;">
+                    <strong>CPO Action:</strong> {{ article.cpo_action }}
+                  </p>
+                </td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+      </table>
+      {% endfor %}
+
+      <hr style="border:none;border-top:1px solid #e8e8e4;margin:8px 0 24px;">
+    </td></tr>
+    {% endfor %}
+
+    <!-- PODCASTS SECTION -->
+    {% if podcasts %}
+    <tr><td style="background:#fafaf8;padding:24px 40px 4px;border:1px solid #e8e8e4;border-top:none;">
+      <span style="display:inline-block;background:#5a3e7a;color:#ffffff;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:3px;font-family:Arial,sans-serif;margin-bottom:16px;">Podcasts Worth Your Ears</span>
+
+      {% for podcast in podcasts %}
+      <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:20px;">
+        <tr>
+          <td style="border-left:3px solid #7a5a9a;padding-left:14px;">
+
+            <!-- Flag badge + show -->
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-bottom:4px;">
+                  <span style="font-size:10px;font-family:Arial,sans-serif;font-weight:bold;color:{% if podcast.flag == 'strategic' %}#5a3e7a{% else %}#7a7a7a{% endif %};">
+                    {% if podcast.flag == 'strategic' %}▲ STRATEGIC{% else %}○ CONTEXTUAL{% endif %}
+                  </span>
+                  <span style="font-size:10px;font-family:Arial,sans-serif;color:#a0a0a0;margin-left:8px;">{{ podcast.show }}{% if podcast.published %} · {{ podcast.published }}{% endif %}</span>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Episode title -->
+            <h3 style="margin:0 0 8px;font-size:15px;font-weight:bold;color:#1a2744;line-height:1.4;">
+              <a href="{{ podcast.url }}" style="color:#1a2744;text-decoration:none;">{{ podcast.title }}</a>
+            </h3>
+
+            <!-- Summary -->
+            <p style="margin:0 0 8px;font-size:13px;line-height:1.6;color:#444444;">{{ podcast.summary }}</p>
+
+            <!-- Key takeaway -->
+            <table cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="background:#f4f0f8;border-radius:4px;padding:8px 12px;">
+                  <p style="margin:0;font-size:12px;font-family:Arial,sans-serif;color:#5a3e7a;">
+                    <strong>Key Takeaway:</strong> {{ podcast.key_takeaway }}
+                  </p>
+                </td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+      </table>
+      {% endfor %}
+    </td></tr>
+    {% endif %}
+
+    <!-- FOOTER -->
+    <tr><td style="background:#1a2744;border-radius:0 0 8px 8px;padding:24px 40px;">
+      <p style="margin:0 0 8px;font-size:12px;color:#8fa3c8;font-family:Arial,sans-serif;">
+        Generated by your CPO Weekly Digest · Curated by Claude AI · Sources: Josh Bersin, SHRM, McKinsey, HBR, MIT Sloan, Deloitte, Gartner and more.
+      </p>
+      <p style="margin:0;font-size:11px;color:#5a6e90;font-family:Arial,sans-serif;">
+        To update sources or preferences, edit <code style="color:#8fa3c8;">digest/sources.yaml</code>
+      </p>
+    </td></tr>
+
+  </table>
+</td></tr>
+</table>
+
+</body>
+</html>

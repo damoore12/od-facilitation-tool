@@ -1,0 +1,6 @@
+.env
+digest_*.html
+__pycache__/
+*.pyc
+*.mp3
+*.m4a

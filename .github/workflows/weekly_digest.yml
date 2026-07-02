@@ -1,0 +1,38 @@
+name: CPO Weekly Digest
+
+on:
+  schedule:
+    # Every Monday at 7am Pacific Time
+    # PDT (summer, UTC-7): 14:00 UTC
+    # PST (winter, UTC-8): shifts to 6am — adjust to 0 15 * * 1 in winter if preferred
+    - cron: "0 14 * * 1"
+  workflow_dispatch: # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  send-digest:
+    name: Generate and send weekly digest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: digest/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r digest/requirements.txt
+
+      - name: Run weekly digest
+        working-directory: digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python weekly_digest.py
