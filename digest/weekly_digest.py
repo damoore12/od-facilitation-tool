@@ -133,17 +133,19 @@ def _score_articles(articles: list[dict]) -> list[dict]:
             for j, a in enumerate(batch)
         )
         try:
-            with client.messages.stream(
-                model="claude-sonnet-5",
+            response = client.messages.create(
+                model="claude-haiku-4-5-20251001",
                 max_tokens=4096,
                 system=ARTICLE_SCORING_SYSTEM,
                 messages=[{
                     "role": "user",
                     "content": ARTICLE_SCORING_PROMPT.format(articles=articles_text),
                 }],
-            ) as stream:
-                response = stream.get_final_message()
-            results = json.loads(response.content[0].text)
+            )
+            text_block = next((b for b in response.content if hasattr(b, "text")), None)
+            if not text_block:
+                raise ValueError("No text block in response")
+            results = json.loads(text_block.text)
             for item in results:
                 idx = item.get("index", 0) - 1
                 if 0 <= idx < len(batch):
