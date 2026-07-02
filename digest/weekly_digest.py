@@ -145,7 +145,12 @@ def _score_articles(articles: list[dict]) -> list[dict]:
             text_block = next((b for b in response.content if hasattr(b, "text")), None)
             if not text_block:
                 raise ValueError("No text block in response")
-            results = json.loads(text_block.text)
+            raw = text_block.text.strip()
+            # Strip markdown code fences if the model wrapped its JSON
+            if raw.startswith("```"):
+                raw = raw.split("\n", 1)[-1]
+                raw = raw.rsplit("```", 1)[0].strip()
+            results = json.loads(raw)
             for item in results:
                 idx = item.get("index", 0) - 1
                 if 0 <= idx < len(batch):
